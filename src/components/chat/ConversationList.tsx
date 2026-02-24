@@ -99,7 +99,7 @@ const ConversationList = ({ activeId, onSelect }: ConversationListProps) => {
           >
             <div className="flex flex-col w-full gap-4">
               {/* Popup Title */}
-              <h3 className="text-base font-semibold text-foreground px-2">New Message</h3>
+              <h3 className="text-sm font-semibold text-foreground px-2">New Message</h3>
 
               {/* Search */}
               <div className="flex items-center gap-2 h-8 rounded-[10px] border border-border px-2.5">
