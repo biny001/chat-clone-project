@@ -12,7 +12,7 @@ const Index = () => {
       <IconSidebar />
       <div className="flex flex-1 flex-col gap-0 p-2 pl-0">
         <TopBar />
-        <div className="flex flex-1 mt-2 rounded-2xl overflow-hidden">
+        <div className="flex flex-1 mt-2 gap-2 overflow-hidden">
           <ConversationList
             activeId={activeConversationId}
             onSelect={setActiveConversationId}
