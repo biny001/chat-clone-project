@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -62,6 +63,8 @@ const navItems = [
 ];
 
 const IconSidebar = () => {
+  const [activeNav, setActiveNav] = useState("Messages");
+
   return (
     <div className="flex h-full w-[76px] flex-col items-center justify-between py-6 px-4">
       {/* Top section */}
@@ -75,9 +78,10 @@ const IconSidebar = () => {
             <Tooltip key={item.label}>
               <TooltipTrigger asChild>
                 <button
+                  onClick={() => setActiveNav(item.label)}
                   className={cn(
                     "flex h-11 w-11 items-center justify-center rounded-lg transition-colors",
-                    item.active
+                    activeNav === item.label
                       ? "bg-[#F0FDF4] border border-[#1E9A80]"
                       : "hover:bg-muted"
                   )}
