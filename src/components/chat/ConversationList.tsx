@@ -147,28 +147,26 @@ const ConversationItem = ({
         </button>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-[200px] rounded-2xl p-2 border-border shadow-[0px_0px_24px_rgba(0,0,0,0.06)]">
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm focus:bg-[hsl(60,14%,94%)]">
           <MessageCircle size={16} /> Mark as unread
         </ContextMenuItem>
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm focus:bg-[hsl(60,14%,94%)]">
           <Archive size={16} /> Archive
         </ContextMenuItem>
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm justify-between">
-          <span className="flex items-center gap-2"><Volume2 size={16} /> Mute</span>
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm justify-between focus:bg-[hsl(60,14%,94%)]">
+          <span className="flex items-center gap-2.5"><Volume2 size={16} /> Mute</span>
           <ChevronRight size={14} className="text-muted-foreground" />
         </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm focus:bg-[hsl(60,14%,94%)]">
           <User size={16} /> Contact info
         </ContextMenuItem>
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm focus:bg-[hsl(60,14%,94%)]">
           <Upload size={16} /> Export chat
         </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm focus:bg-[hsl(60,14%,94%)]">
           <X size={16} /> Clear chat
         </ContextMenuItem>
-        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm text-destructive">
+        <ContextMenuItem className="gap-2.5 rounded-lg px-2 py-[6px] text-sm text-destructive focus:bg-[hsl(60,14%,94%)]">
           <Trash2 size={16} /> Delete chat
         </ContextMenuItem>
       </ContextMenuContent>
