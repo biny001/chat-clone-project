@@ -119,14 +119,14 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
       </ScrollArea>
 
       {/* Input Bar */}
-      <div className="pt-2">
-        <div className="flex items-center rounded-full border border-border px-4 py-3 gap-1">
+      <div className="pt-3">
+        <div className="flex items-center rounded-full border border-border pl-4 pr-1 py-1 gap-1 h-10">
           <input
             type="text"
             placeholder="Type any message..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="flex-1 bg-transparent text-xs leading-4 text-foreground placeholder:text-muted-foreground outline-none"
+            className="flex-1 bg-transparent text-xs leading-4 text-foreground placeholder:text-[#8796AF] outline-none"
           />
           <div className="flex items-center gap-2">
             <button className="w-6 h-6 flex items-center justify-center rounded-full">
