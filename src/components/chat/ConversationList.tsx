@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Check, Filter, PenLine } from "lucide-react";
+import { Search, Check, Filter, PenLine, MessageCircle, Archive, Volume2, User, Upload, X, Trash2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -146,16 +146,31 @@ const ConversationItem = ({
           </div>
         </button>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-48">
-        <ContextMenuItem>Mark as unread</ContextMenuItem>
-        <ContextMenuItem>Archive</ContextMenuItem>
-        <ContextMenuItem>Mute</ContextMenuItem>
+      <ContextMenuContent className="w-[200px] rounded-2xl p-2 border-border shadow-[0px_0px_24px_rgba(0,0,0,0.06)]">
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+          <MessageCircle size={16} /> Mark as unread
+        </ContextMenuItem>
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+          <Archive size={16} /> Archive
+        </ContextMenuItem>
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm justify-between">
+          <span className="flex items-center gap-2"><Volume2 size={16} /> Mute</span>
+          <ChevronRight size={14} className="text-muted-foreground" />
+        </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem>Contact info</ContextMenuItem>
-        <ContextMenuItem>Export chat</ContextMenuItem>
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+          <User size={16} /> Contact info
+        </ContextMenuItem>
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+          <Upload size={16} /> Export chat
+        </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem>Clear chat</ContextMenuItem>
-        <ContextMenuItem className="text-destructive">Delete chat</ContextMenuItem>
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm">
+          <X size={16} /> Clear chat
+        </ContextMenuItem>
+        <ContextMenuItem className="gap-2 rounded-lg px-2 py-2 text-sm text-destructive">
+          <Trash2 size={16} /> Delete chat
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
