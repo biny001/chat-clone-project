@@ -24,7 +24,7 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-chat-bg">
+    <div className="flex flex-1 flex-col bg-chat-bg rounded-3xl overflow-hidden">
       {/* Chat Header */}
       <div className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
         <div className="flex items-center gap-3">

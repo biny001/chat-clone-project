@@ -7,6 +7,7 @@ export interface Conversation {
   unread?: number;
   online?: boolean;
   typing?: boolean;
+  read?: boolean;
 }
 
 export interface Message {
@@ -19,30 +20,26 @@ export interface Message {
 }
 
 export const conversations: Conversation[] = [
-  { id: "1", name: "Anil", avatar: "A", lastMessage: "Typing...", timestamp: "Today, 9:52pm", online: true, typing: true },
-  { id: "2", name: "Mary Cha", avatar: "M", lastMessage: "Take care, see you tomorrow...", timestamp: "Today, 12:11pm", online: true },
-  { id: "3", name: "Tina", avatar: "T", lastMessage: "I'm on the way, I'm com...", timestamp: "Today, 2:40pm", unread: 4 },
-  { id: "4", name: "Ranganathan", avatar: "R", lastMessage: "Let's catchup at 9 PM to...", timestamp: "Yesterday, 12:31pm" },
-  { id: "5", name: "Josh", avatar: "J", lastMessage: "What is your plan today?...", timestamp: "Yesterday, 12:31pm" },
-  { id: "6", name: "Harriet", avatar: "H", lastMessage: "Will you pick me up tom...", timestamp: "Wednesday, 9:40am" },
-  { id: "7", name: "Ally", avatar: "AL", lastMessage: "Good Morning 🌞", timestamp: "Monday, 3:00pm" },
-  { id: "8", name: "Catherine James", avatar: "C", lastMessage: "Let me share the detail...", timestamp: "Sunday, 6:00pm" },
+  { id: "1", name: "Fego Chidera", avatar: "FC", lastMessage: "Thanks for the explanation!", timestamp: "3 mins ago", online: true, read: true },
+  { id: "2", name: "Yomi Immanuel", avatar: "YI", lastMessage: "Let's do a quick call after lunch, I'll explai...", timestamp: "12 mins ago", online: true, read: true },
+  { id: "3", name: "Bianca Nubia", avatar: "BN", lastMessage: "anytime! my pleasure~", timestamp: "32 mins ago", read: true },
+  { id: "4", name: "Zender Lowre", avatar: "ZL", lastMessage: "Okay cool, that make sense 👍", timestamp: "1 hour ago", read: true },
+  { id: "5", name: "Palmer Dian", avatar: "PD", lastMessage: "Thanks, Jonas! That helps 😄", timestamp: "5 hour ago" },
+  { id: "6", name: "Yuki Tanaka", avatar: "YT", lastMessage: "Have you watch the new season of Danm...", timestamp: "12 hour ago", read: true },
 ];
 
 export const messages: Record<string, Message[]> = {
   "1": [
-    { id: "m1", conversationId: "1", text: "Hi Anil, how are you doing?", timestamp: "Today, 8:33pm", sent: true, read: true },
-    { id: "m2", conversationId: "1", text: "I'm doing good, thanks for asking! How about you?", timestamp: "Today, 8:35pm", sent: false },
-    { id: "m3", conversationId: "1", text: "I'm great! Just working on the new project. Want to catch up later?", timestamp: "Today, 9:51pm", sent: true, read: true },
+    { id: "m1", conversationId: "1", text: "Hi, how are you doing?", timestamp: "Today, 8:33pm", sent: true, read: true },
+    { id: "m2", conversationId: "1", text: "I'm doing good, thanks for asking!", timestamp: "Today, 8:35pm", sent: false },
+    { id: "m3", conversationId: "1", text: "Thanks for the explanation!", timestamp: "Today, 9:51pm", sent: false },
   ],
   "2": [
-    { id: "m4", conversationId: "2", text: "Hey Mary! Are we still on for tomorrow?", timestamp: "Today, 11:00am", sent: true, read: true },
-    { id: "m5", conversationId: "2", text: "Yes! I'll be there at 10am.", timestamp: "Today, 11:30am", sent: false },
-    { id: "m6", conversationId: "2", text: "Perfect, see you then!", timestamp: "Today, 12:00pm", sent: true, read: true },
-    { id: "m7", conversationId: "2", text: "Take care, see you tomorrow! 😊", timestamp: "Today, 12:11pm", sent: false },
+    { id: "m4", conversationId: "2", text: "Hey! Are we still on for tomorrow?", timestamp: "Today, 11:00am", sent: true, read: true },
+    { id: "m5", conversationId: "2", text: "Let's do a quick call after lunch, I'll explain the brief later on", timestamp: "Today, 11:30am", sent: false },
   ],
   "3": [
-    { id: "m8", conversationId: "3", text: "Where are you?", timestamp: "Today, 2:30pm", sent: true },
-    { id: "m9", conversationId: "3", text: "I'm on the way, I'm coming now!", timestamp: "Today, 2:40pm", sent: false },
+    { id: "m8", conversationId: "3", text: "Thank you so much for your help!", timestamp: "Today, 2:30pm", sent: true },
+    { id: "m9", conversationId: "3", text: "anytime! my pleasure~", timestamp: "Today, 2:40pm", sent: false },
   ],
 };
