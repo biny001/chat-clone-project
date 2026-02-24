@@ -97,7 +97,7 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
                       {msg.text}
                     </div>
                     {msg.reaction && (
-                      <span className="absolute left-2 -bottom-2.5 bg-card rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                      <span className="absolute left-2 -bottom-3 bg-card rounded-full w-5 h-5 flex items-center justify-center text-xs z-10">
                         {msg.reaction}
                       </span>
                     )}
