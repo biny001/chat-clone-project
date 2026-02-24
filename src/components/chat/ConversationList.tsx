@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, Check, Filter, PenLine, MessageCircle, Archive, Volume2, User, Upload, X, Trash2, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -8,10 +8,19 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { conversations, type Conversation } from "@/data/mockData";
+
+const contacts = [
+  { id: "c1", name: "Adrian Kurt", avatar: "AK" },
+  { id: "c2", name: "Bianca Lofre", avatar: "BL" },
+  { id: "c3", name: "Diana Sayu", avatar: "DS" },
+  { id: "c4", name: "Palmer Dian", avatar: "PD" },
+  { id: "c5", name: "Sam Kohler", avatar: "SK" },
+  { id: "c6", name: "Yuki Tanaka", avatar: "YT" },
+  { id: "c7", name: "Zender Lowre", avatar: "ZL" },
+];
 
 const avatarColors: Record<string, string> = {
   FC: "bg-orange-400",
@@ -29,17 +38,48 @@ interface ConversationListProps {
 
 const ConversationList = ({ activeId, onSelect }: ConversationListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNewMessage, setShowNewMessage] = useState(false);
+  const [contactSearch, setContactSearch] = useState("");
+  const popupRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const filtered = conversations.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredContacts = contacts.filter((c) =>
+    c.name.toLowerCase().includes(contactSearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        showNewMessage &&
+        popupRef.current &&
+        !popupRef.current.contains(e.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target as Node)
+      ) {
+        setShowNewMessage(false);
+        setContactSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showNewMessage]);
+
+
   return (
     <div className="flex h-full w-[400px] flex-col rounded-3xl bg-card p-6 gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="relative flex items-center justify-between">
         <h2 className="text-xl font-semibold text-foreground leading-[30px] tracking-[-0.006em]">All Message</h2>
         <button
+          ref={buttonRef}
+          onClick={() => {
+            setShowNewMessage((v) => !v);
+            setContactSearch("");
+          }}
           className="flex items-center justify-center gap-1.5 h-8 px-2 rounded-lg text-sm font-medium text-white"
           style={{
             background: "linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 100%), #1E9A80",
@@ -50,6 +90,54 @@ const ConversationList = ({ activeId, onSelect }: ConversationListProps) => {
           <PenLine size={18} className="text-white" />
           <span className="text-sm font-medium leading-5 tracking-[-0.006em]">New Message</span>
         </button>
+
+        {/* New Message Popup */}
+        {showNewMessage && (
+          <div
+            ref={popupRef}
+            className="absolute right-0 top-full mt-2 z-50 flex flex-col items-center p-3 w-[273px] bg-card border border-border rounded-2xl shadow-[0px_0px_24px_rgba(0,0,0,0.06)]"
+          >
+            <div className="flex flex-col w-full gap-4">
+              {/* Popup Title */}
+              <h3 className="text-base font-semibold text-foreground px-2">New Message</h3>
+
+              {/* Search */}
+              <div className="flex items-center gap-2 h-8 rounded-[10px] border border-border px-2.5">
+                <Search size={14} className="shrink-0 text-muted-foreground" />
+                <input
+                  placeholder="Search name or email"
+                  value={contactSearch}
+                  onChange={(e) => setContactSearch(e.target.value)}
+                  className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+                  autoFocus
+                />
+              </div>
+
+              {/* Contact List */}
+              <ScrollArea className="max-h-[328px]">
+                <div className="flex flex-col gap-1">
+                  {filteredContacts.map((contact) => (
+                    <button
+                      key={contact.id}
+                      onClick={() => {
+                        setShowNewMessage(false);
+                        setContactSearch("");
+                      }}
+                      className="flex items-center gap-2.5 px-2 py-[6px] rounded-lg hover:bg-[hsl(60,14%,94%)] transition-colors w-full text-left"
+                    >
+                      <Avatar className="h-8 w-8 shrink-0">
+                        <AvatarFallback className="text-[10px] font-semibold text-foreground bg-muted">
+                          {contact.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium text-foreground">{contact.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Search */}
