@@ -78,7 +78,7 @@ const IconSidebar = () => {
                   className={cn(
                     "flex h-11 w-11 items-center justify-center rounded-lg transition-colors",
                     item.active
-                      ? "bg-[hsl(var(--chat-bubble-received))] border border-chat-sent"
+                      ? "bg-[#F0FDF4] border border-[#1E9A80]"
                       : "hover:bg-muted"
                   )}
                 >
