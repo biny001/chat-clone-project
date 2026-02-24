@@ -10,9 +10,9 @@ const Index = () => {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-secondary">
       <IconSidebar />
-      <div className="flex flex-1 flex-col gap-0 p-2 pl-0">
+      <div className="flex flex-1 flex-col p-3 pl-0 gap-3">
         <TopBar />
-        <div className="flex flex-1 mt-2 gap-2 overflow-hidden">
+        <div className="flex flex-1 gap-3 overflow-hidden">
           <ConversationList
             activeId={activeConversationId}
             onSelect={setActiveConversationId}
