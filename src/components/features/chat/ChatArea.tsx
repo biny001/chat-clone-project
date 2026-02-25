@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 import { MessageGroup, groupMessages } from "./MessageBubble";
+import { TypingBubble } from "./TypingBubble";
 import type { Conversation, Message } from "@/types/chat";
 
 interface ChatAreaProps {
@@ -21,7 +22,7 @@ export const ChatArea = ({ conversation, messages: chatMessages, onSendMessage, 
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages.length]);
+  }, [chatMessages.length, isOtherUserTyping]);
 
   if (!conversation) {
     return (
@@ -49,6 +50,7 @@ export const ChatArea = ({ conversation, messages: chatMessages, onSendMessage, 
             {groupedMessages.map((group, gi) => (
               <MessageGroup key={gi} sent={group.sent} messages={group.messages} />
             ))}
+            {isOtherUserTyping && <TypingBubble />}
             <div ref={bottomRef} />
           </div>
         </ScrollArea>

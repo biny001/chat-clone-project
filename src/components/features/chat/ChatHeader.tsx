@@ -26,7 +26,10 @@ export const ChatHeader = ({ conversation, onOpenContactInfo, isOtherUserTyping 
           <h3 className="text-sm font-medium leading-5 tracking-[-0.006em] text-foreground">
             {conversation.name}
           </h3>
-          <p className="text-xs font-medium leading-4" style={{ color: "#38C793" }}>
+          <p
+            className="text-xs font-medium leading-4 transition-opacity duration-200"
+            style={{ color: isOtherUserTyping ? "#38C793" : conversation.online ? "#38C793" : "#8B8B8B" }}
+          >
             {isOtherUserTyping ? "typing..." : conversation.online ? "Online" : "Offline"}
           </p>
         </div>
