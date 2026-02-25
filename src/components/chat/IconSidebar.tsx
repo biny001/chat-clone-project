@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ArrowLeft, Pencil, Gift, Sun, LogOut } from "lucide-react";
 
 const HomeIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,7 +18,7 @@ const ChatCircleIcon = () => (
 
 const CompassIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.41489 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM10 16.875C8.64026 16.875 7.31105 16.4718 6.18046 15.7164C5.04987 14.9609 4.16868 13.8872 3.64833 12.6309C3.12798 11.3747 2.99183 9.99237 3.2571 8.65875C3.52238 7.32513 4.17716 6.10013 5.13864 5.13864C6.10013 4.17715 7.32514 3.52237 8.65876 3.2571C9.99238 2.99183 11.3747 3.12798 12.631 3.64833C13.8872 4.16868 14.9609 5.04987 15.7164 6.18045C16.4718 7.31104 16.875 8.64025 16.875 10C16.8729 11.8227 16.1479 13.5702 14.8591 14.8591C13.5702 16.1479 11.8227 16.8729 10 16.875ZM13.4703 5.69062L8.47032 8.19062C8.34943 8.25135 8.25135 8.34943 8.19063 8.47031L5.69063 13.4703C5.64293 13.5656 5.6204 13.6716 5.62519 13.7781C5.62997 13.8845 5.66191 13.988 5.71796 14.0787C5.77402 14.1693 5.85233 14.2442 5.94545 14.296C6.03857 14.3479 6.14341 14.3751 6.25 14.375C6.34703 14.3749 6.44273 14.3524 6.52969 14.3094L11.5297 11.8094C11.6506 11.7487 11.7487 11.6506 11.8094 11.5297L14.3094 6.52969C14.3684 6.41229 14.3888 6.27929 14.3679 6.14958C14.347 6.01988 14.2857 5.90006 14.1928 5.80716C14.0999 5.71426 13.9801 5.653 13.8504 5.63208C13.7207 5.61116 13.5877 5.63164 13.4703 5.69062ZM10.7813 10.7812L7.64766 12.3523L9.21875 9.21875L12.3555 7.65078L10.7813 10.7812Z" fill="#151515"/>
+    <path d="M10 1.875C8.39303 1.875 6.82214 2.35152 5.486 3.24431C4.14985 4.1371 3.10844 5.40605 2.49348 6.8907C1.87852 8.37535 1.71762 10.009 2.03112 11.5851C2.34463 13.1612 3.11846 14.6089 4.25476 15.7452C5.39106 16.8815 6.8388 17.6554 8.41489 17.9689C9.99099 18.2824 11.6247 18.1215 13.1093 17.5065C14.594 16.8916 15.8629 15.8502 16.7557 14.514C17.6485 13.1779 18.125 11.607 18.125 10C18.1227 7.84581 17.266 5.78051 15.7427 4.25727C14.2195 2.73403 12.1542 1.87727 10 1.875ZM10 16.875C8.64026 16.875 7.31105 16.4718 6.18046 15.7164C5.04987 14.9609 4.16868 13.8872 3.64833 12.6309C3.12798 11.3747 2.99183 9.99237 3.2571 8.65875C3.52238 7.32513 4.17716 6.10013 5.13864 5.13864C6.10013 4.17715 7.32514 3.52237 8.65876 3.2571C9.99238 2.99183 11.3747 3.12798 12.631 3.64833C13.8872 4.16868 14.9609 5.04987 15.7164 6.18045C16.4718 7.31104 16.875 8.64025 16.875 10C16.8729 11.8227 16.1479 13.5702 14.8591 14.8591C13.5702 16.1479 11.8227 16.8729 10 16.875ZM13.4703 5.69062L8.47032 8.19062C8.34943 8.25135 8.25135 8.34943 8.19063 8.47031L5.69063 13.4703C5.64293 13.5656 5.6204 13.6716 5.62519 13.7781C5.62997 13.8845 5.66191 13.988 5.71796 14.0787C5.77402 14.1693 5.85233 14.2442 5.94545 14.296C6.03857 14.3479 6.14341 14.375 6.25 14.375C6.34703 14.3749 6.44273 14.3524 6.52969 14.3094L11.5297 11.8094C11.6506 11.7487 11.7487 11.6506 11.8094 11.5297L14.3094 6.52969C14.3684 6.41229 14.3888 6.27929 14.3679 6.14958C14.347 6.01988 14.2857 5.90006 14.1928 5.80716C14.0999 5.71426 13.9801 5.653 13.8504 5.63208C13.7207 5.61116 13.5877 5.63164 13.4703 5.69062ZM10.7813 10.7812L7.64766 12.3523L9.21875 9.21875L12.3555 7.65078L10.7813 10.7812Z" fill="#151515"/>
   </svg>
 );
 
@@ -61,15 +62,175 @@ const navItems = [
   { icon: ImagesIcon, label: "Media", active: false },
 ];
 
-const IconSidebar = () => {
-  const [activeNav, setActiveNav] = useState("Messages");
+const LogoMenu = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open, onClose]);
+
+  if (!open) return null;
 
   return (
-    <div className="flex h-full w-[76px] flex-col items-center justify-between py-6 px-4">
+    <div
+      ref={menuRef}
+      className="absolute left-4 top-[74px] z-50 flex w-[307px] flex-col items-start gap-1 rounded-2xl bg-popover py-1"
+      style={{ boxShadow: "0px 1px 13.8px 1px rgba(18, 18, 18, 0.1)" }}
+    >
+      {/* Section 1: Go back + Rename */}
+      <div className="flex w-full flex-col items-start px-1 gap-1">
+        <div className="w-full rounded-xl p-1">
+          {/* Go back to dashboard */}
+          <button
+            className="flex w-[287px] items-center gap-2 rounded-lg px-1.5 py-1.5 hover:bg-[#F8F8F5] transition-colors"
+            onClick={onClose}
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F3F3EE]">
+              <ArrowLeft className="h-4 w-4 text-[#09090B]" />
+            </div>
+            <span className="text-sm font-medium tracking-[-0.01em] text-[#09090B]">
+              Go back to dashboard
+            </span>
+          </button>
+
+          {/* Rename file */}
+          <button
+            className="flex w-[287px] items-center gap-2 rounded-lg bg-[#F8F8F5] px-1.5 py-1.5 hover:bg-[#F0F0EB] transition-colors"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-popover">
+              <Pencil className="h-4 w-4 text-[#28303F]" />
+            </div>
+            <span className="text-sm font-medium tracking-[-0.01em] text-[#09090B]">
+              Rename file
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="px-2.5 w-full">
+        <div className="h-px w-full bg-[#E8E5DF]" />
+      </div>
+
+      {/* Section 2: User info */}
+      <div className="flex w-full flex-col items-start px-1">
+        <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 hover:bg-[#F8F8F5] transition-colors">
+          <div className="flex flex-col items-start gap-0.5">
+            <span className="text-sm font-semibold tracking-[-0.01em] text-[#1C1C1C]">
+              testing2
+            </span>
+            <span className="text-xs tracking-[-0.01em] text-[#8B8B8B]">
+              testing2@gmail.com
+            </span>
+          </div>
+        </button>
+      </div>
+
+      {/* Section 3: Credits box */}
+      <div className="flex w-full flex-col items-start">
+        <div className="w-full px-2.5">
+          <div className="flex w-full flex-col gap-2 rounded-lg bg-[#F8F8F5] p-2">
+            {/* Credits + Renews */}
+            <div className="flex w-full items-start gap-2">
+              <div className="flex flex-1 flex-col items-start gap-0.5">
+                <span className="text-xs text-[#8B8B8B]">Credits</span>
+                <span className="text-sm font-medium text-[#09090B]">20 left</span>
+              </div>
+              <div className="flex flex-1 flex-col items-end gap-0.5">
+                <span className="text-xs text-[#8B8B8B]">Renews in</span>
+                <span className="text-sm font-medium text-[#09090B]">6h 24m</span>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="flex flex-col gap-2">
+              <div className="h-2 w-full rounded-full bg-[#E8E5DF]">
+                <div
+                  className="h-2 rounded-full bg-primary"
+                  style={{ width: "62.4%" }}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs tracking-[-0.01em] text-[#5F5F5D]">
+                  5 of 25 used today
+                </span>
+                <span className="text-xs text-primary">
+                  +25 tomorrow
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="px-2.5 w-full mt-1">
+          <div className="h-px w-full bg-[#E8E5DF]" />
+        </div>
+      </div>
+
+      {/* Section 4: Win free credits + Theme */}
+      <div className="flex w-full flex-col items-start px-1">
+        <div className="w-full rounded-xl p-1">
+          <button className="flex w-[287px] items-center gap-2 rounded-lg px-1.5 py-1.5 hover:bg-[#F8F8F5] transition-colors">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F3F3EE]">
+              <Gift className="h-4 w-4 text-[#28303F]" />
+            </div>
+            <span className="text-sm font-medium tracking-[-0.01em] text-[#1C1C1C]">
+              Win free credits
+            </span>
+          </button>
+          <button className="flex w-[287px] items-center gap-2 rounded-lg px-1.5 py-1.5 hover:bg-[#F8F8F5] transition-colors">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F3F3EE]">
+              <Sun className="h-4 w-4 text-[#28303F]" />
+            </div>
+            <span className="text-sm font-medium tracking-[-0.01em] text-[#1C1C1C]">
+              Theme Style
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="px-2.5 w-full">
+        <div className="h-px w-full bg-[#E8E5DF]" />
+      </div>
+
+      {/* Section 5: Log out */}
+      <div className="flex w-full flex-col items-start px-1">
+        <div className="w-full rounded-xl p-1">
+          <button className="flex w-[287px] items-center gap-2 rounded-lg px-1.5 py-1.5 hover:bg-[#F8F8F5] transition-colors">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#F3F3EE]">
+              <LogOut className="h-4 w-4 text-[#28303F]" />
+            </div>
+            <span className="text-sm font-medium tracking-[-0.01em] text-[#1C1C1C]">
+              Log out
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const IconSidebar = () => {
+  const [activeNav, setActiveNav] = useState("Messages");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <div className="relative flex h-full w-[76px] flex-col items-center justify-between py-6 px-4">
       {/* Top section */}
       <div className="flex flex-col items-center gap-8">
         {/* Logo */}
-        <LogoIcon />
+        <button onClick={() => setMenuOpen(!menuOpen)} className="cursor-pointer">
+          <LogoIcon />
+        </button>
 
         {/* Nav items */}
         <div className="flex flex-col items-center gap-2">
@@ -111,6 +272,9 @@ const IconSidebar = () => {
           </AvatarFallback>
         </Avatar>
       </div>
+
+      {/* Logo Menu Popup */}
+      <LogoMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   );
 };
