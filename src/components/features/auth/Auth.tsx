@@ -84,9 +84,6 @@ const Auth = () => {
     await signIn.social({ provider: "google", callbackURL: "/" });
   };
 
-  const handleAppleSignIn = () => {
-    toast({ title: "Coming soon", description: "Apple sign-in is not yet available." });
-  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
@@ -201,10 +198,10 @@ const Auth = () => {
           </motion.div>
 
           {/* social buttons */}
-          <div className="mt-8 flex gap-3">
+          <div className="mt-8">
             <button
               onClick={handleGoogleSignIn}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-secondary"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path
@@ -224,16 +221,7 @@ const Auth = () => {
                   fill="#EA4335"
                 />
               </svg>
-              Google
-            </button>
-            <button
-              onClick={handleAppleSignIn}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-secondary"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.18 0-.36-.02-.53-.06-.01-.18-.04-.56-.04-.95 0-1.05.45-2.3 1.23-3.09.39-.4.97-.82 1.66-1.13.68-.3 1.32-.47 1.89-.51.01.21.02.43.02.65zm4.655 16.96c-.01.03-.02.06-.03.09-.36 1.1-.96 2.08-1.7 2.96-.68.8-1.39 1.61-2.5 1.61-1.1 0-1.47-.65-2.73-.65-1.28 0-1.7.63-2.73.67-1.07.04-1.89-.87-2.57-1.67-1.39-1.63-2.46-4.62-1.03-6.64.71-1 1.97-1.63 3.34-1.65 1.07-.02 2.08.72 2.73.72.66 0 1.88-.89 3.17-.76.54.02 2.06.22 3.03 1.64-.08.05-1.81 1.06-1.79 3.15.02 2.5 2.19 3.33 2.21 3.34zm-2.62-11.22c-.01 0-.01 0 0 0z" />
-              </svg>
-              Apple
+              Continue with Google
             </button>
           </div>
 
