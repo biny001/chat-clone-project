@@ -35,7 +35,7 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
   const groupedMessages = groupMessages(chatMessages);
 
   return (
-    <div className="flex flex-1 overflow-hidden gap-3">
+    <div className="relative flex flex-1 overflow-hidden">
       <div className="flex flex-1 flex-col rounded-3xl bg-card p-3 overflow-hidden">
       {/* Chat Header */}
       <div className="flex items-center px-3 pt-1 pb-4 gap-3">
@@ -154,13 +154,15 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
       </div>
     </div>
 
-      {/* Contact Info Panel */}
+      {/* Contact Info Panel - overlays on the right */}
       {showContactInfo && (
-        <ContactInfoPanel
-          name={conversation.name}
-          avatar={conversation.avatar}
-          onClose={() => setShowContactInfo(false)}
-        />
+        <div className="absolute right-0 top-0 bottom-0 z-20">
+          <ContactInfoPanel
+            name={conversation.name}
+            avatar={conversation.avatar}
+            onClose={() => setShowContactInfo(false)}
+          />
+        </div>
       )}
     </div>
   );
