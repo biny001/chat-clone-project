@@ -1,73 +1,120 @@
-# Welcome to your Lovable project
+# Chatly
 
-## Project info
+A modern, real-time chat application built with Next.js. Chatly delivers a seamless messaging experience with features like file sharing, voice messages, read receipts, and message replies — all in a responsive interface that works across desktop and mobile.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Real-time messaging** — Instant message delivery powered by Ably
+- **File sharing** — Send images, videos, documents, and audio files with in-chat upload progress
+- **Voice messages** — Record and send voice notes directly from the chat
+- **Message replies** — Reply to specific messages with quoted context
+- **Message editing** — Edit sent messages with an "(edited)" indicator
+- **Read receipts** — Double-check marks when messages are read
+- **Typing indicators** — See when the other person is typing
+- **Online status** — Green/grey dots showing user availability
+- **Unread counts** — Badge counts on conversations with new messages
+- **Link previews** — Automatic Open Graph previews for shared URLs
+- **In-chat search** — Filter messages within a conversation
+- **Image preview overlay** — WhatsApp-style media staging before sending
+- **User profiles** — Upload and manage profile avatars
+- **Responsive design** — Full mobile support with conversation list/chat toggle
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| UI | React 18, Tailwind CSS, shadcn/ui, Radix UI |
+| State | TanStack React Query |
+| Real-time | Ably |
+| Auth | Better Auth (email/password + Google OAuth) |
+| Database | PostgreSQL (Neon) via Prisma 7 |
+| File uploads | UploadThing |
+| Animations | Framer Motion |
+| Icons | Lucide React |
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+
+- pnpm
+- PostgreSQL database (Neon recommended)
+- Ably account
+- UploadThing account
+- Google OAuth credentials (optional, for social login)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Setup
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/chatly.git
+   cd chatly
+   ```
 
-Follow these steps:
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. Create a `.env` file with the following variables:
+   ```
+   DATABASE_URL="your-neon-connection-string"
+   BETTER_AUTH_SECRET="your-auth-secret"
+   NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+   GOOGLE_CLIENT_ID="your-google-client-id"
+   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   ABLY_API_KEY="your-ably-api-key"
+   UPLOADTHING_TOKEN="your-uploadthing-token"
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+4. Run database migrations:
+   ```bash
+   npx prisma migrate dev
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+5. Start the development server:
+   ```bash
+   pnpm dev
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+6. Open [http://localhost:3000](http://localhost:3000)
+
+## Scripts
+
+| Command | Description |
+|---------|------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+
+## Project Structure
+
+```
+app/                  # Next.js App Router (pages, API routes)
+├── api/              # REST API endpoints
+│   ├── messages/     # Send, edit messages
+│   ├── conversations/# List, create, read receipts
+│   ├── uploadthing/  # File upload handler
+│   └── ...
+src/
+├── components/
+│   ├── features/     # Feature-grouped components
+│   │   ├── chat/     # ChatArea, MessageBubble, ChatInput, etc.
+│   │   ├── conversations/ # ConversationList, ConversationItem
+│   │   ├── contact-info/  # ContactInfoPanel, shared media tabs
+│   │   ├── auth/     # Login/signup form
+│   │   └── ...
+│   └── ui/           # shadcn/ui primitives
+├── hooks/            # Custom React hooks
+├── lib/              # Utilities, auth config, Prisma client
+└── types/            # TypeScript interfaces
+prisma/
+└── schema.prisma     # Database schema
 ```
 
-**Edit a file directly in GitHub**
+## License
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MIT
