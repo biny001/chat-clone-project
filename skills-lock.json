@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "ably-realtime": {
+      "source": "itzaks/ably-realtime-skill",
+      "sourceType": "github",
+      "computedHash": "ea572420d9dfc00b29fe0d33624c38445f917a1eaf889592507b232697b17be8"
+    },
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "computedHash": "ae9bd37665a525bdb056ff6f27afc0f9c7c75809e3e23ed85c0d398dd10f6a96"
+    },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "computedHash": "7380d0bcb68bfa28639bb1b7ca27f3eca1857899b885c66a7004070ec0640e50"
+    },
+    "neon-postgres": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "c07eb8fc93166dea894138fa38e3b2431e5f11906c77077f4ed2b5f489daf1fa"
+    },
+    "prisma-client-api": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "a982b2a15dc9d4223be7844f082e6481e1e24df1f379fbcf66b82d5b58e80bec"
+    },
+    "prisma-database-setup": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "computedHash": "72e2360923e949261a15ca1dbcfac5662ec5e851f6045ffb13163a55a083bcea"
+    }
+  }
+}

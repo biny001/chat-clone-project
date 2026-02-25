@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tail:*)",
+      "Bash(cd:*)",
+      "Bash(true:*)",
+      "WebSearch",
+      "WebFetch(domain:www.better-auth.com)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npm install prisma @types/pg --save-dev 2>&1)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx prisma generate 2>&1)",
+      "Bash(head:*)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx tsc --noEmit 2>&1)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx prisma db push 2>&1)"
+    ]
+  }
+}

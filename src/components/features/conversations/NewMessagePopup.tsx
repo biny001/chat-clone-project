@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef } from "react";
 import { Search } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

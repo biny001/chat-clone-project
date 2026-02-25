@@ -1,6 +1,9 @@
+"use client";
+
 import { useRef } from "react";
 import { ArrowLeft, Pencil, Gift, Sun, LogOut } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { useAuth } from "@/hooks/use-auth";
 
 interface LogoMenuProps {
   open: boolean;
@@ -10,6 +13,7 @@ interface LogoMenuProps {
 export const LogoMenu = ({ open, onClose }: LogoMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   useClickOutside(menuRef, onClose, open);
+  const { user, signOut } = useAuth();
 
   if (!open) return null;
 
@@ -33,8 +37,8 @@ export const LogoMenu = ({ open, onClose }: LogoMenuProps) => {
       <div className="flex w-full flex-col items-start px-1">
         <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 hover:bg-[#F8F8F5] transition-colors">
           <div className="flex flex-col items-start gap-0.5">
-            <span className="text-sm font-semibold tracking-[-0.01em] text-[#1C1C1C]">testing2</span>
-            <span className="text-xs tracking-[-0.01em] text-[#8B8B8B]">testing2@gmail.com</span>
+            <span className="text-sm font-semibold tracking-[-0.01em] text-[#1C1C1C]">{user?.name || "User"}</span>
+            <span className="text-xs tracking-[-0.01em] text-[#8B8B8B]">{user?.email || ""}</span>
           </div>
         </button>
       </div>
@@ -82,7 +86,7 @@ export const LogoMenu = ({ open, onClose }: LogoMenuProps) => {
       {/* Section 5: Log out */}
       <div className="flex w-full flex-col items-start px-1">
         <div className="w-full rounded-xl p-1">
-          <MenuButton icon={<LogOut className="h-4 w-4 text-[#28303F]" />} label="Log out" />
+          <MenuButton icon={<LogOut className="h-4 w-4 text-[#28303F]" />} label="Log out" onClick={signOut} />
         </div>
       </div>
     </div>

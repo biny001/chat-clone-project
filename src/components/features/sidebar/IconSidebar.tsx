@@ -1,9 +1,12 @@
+"use client";
+
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HomeIcon, ChatCircleIcon, CompassIcon, FolderIcon, ImagesIcon, StarFourIcon, LogoIcon } from "@/components/icons";
 import { LogoMenu } from "./LogoMenu";
+import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
   { icon: HomeIcon, label: "Home" },
@@ -16,6 +19,7 @@ const navItems = [
 export const IconSidebar = () => {
   const [activeNav, setActiveNav] = useState("Messages");
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, userInitials } = useAuth();
 
   return (
     <div className="relative flex h-full w-[76px] flex-col items-center justify-between py-6 px-4">
@@ -58,8 +62,8 @@ export const IconSidebar = () => {
           <TooltipContent side="right">AI</TooltipContent>
         </Tooltip>
         <Avatar className="h-11 w-11 cursor-pointer">
-          <AvatarImage src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face" />
-          <AvatarFallback className="bg-muted text-xs font-medium">JD</AvatarFallback>
+          <AvatarImage src={user?.image || undefined} />
+          <AvatarFallback className="bg-muted text-xs font-medium">{userInitials || "?"}</AvatarFallback>
         </Avatar>
       </div>
 

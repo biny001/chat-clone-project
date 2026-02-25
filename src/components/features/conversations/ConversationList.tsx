@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Search, Filter, PenLine } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";

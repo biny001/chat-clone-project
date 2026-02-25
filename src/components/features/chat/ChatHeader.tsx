@@ -1,3 +1,5 @@
+"use client";
+
 import { Search, Phone, Video, MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Conversation } from "@/types/chat";
