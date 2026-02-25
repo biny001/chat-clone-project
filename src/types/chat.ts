@@ -19,7 +19,7 @@ export interface Message {
   read?: boolean;
   reaction?: string;
   isFollowUp?: boolean;
-  type?: "text" | "image" | "file";
+  type?: "text" | "image" | "file" | "audio";
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;

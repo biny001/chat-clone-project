@@ -47,14 +47,23 @@ export function toConversation(
   };
 }
 
-export function toMessage(api: ApiMessage, currentUserId: string): Message {
+export function toMessage(
+  api: ApiMessage,
+  currentUserId: string,
+  otherUserLastReadAt?: string | null
+): Message {
+  const isSent = api.senderId === currentUserId;
+  // A sent message is "read" if the other user's read cursor is at or after this message's time
+  const isRead = isSent && !!otherUserLastReadAt &&
+    new Date(otherUserLastReadAt) >= new Date(api.createdAt);
   return {
     id: api.id,
     conversationId: api.chatSessionId,
     text: api.content,
     timestamp: formatMessageTimestamp(api.createdAt),
-    sent: api.senderId === currentUserId,
-    type: (api.type as "text" | "image" | "file") || "text",
+    sent: isSent,
+    read: isRead,
+    type: (api.type as "text" | "image" | "file" | "audio") || "text",
     fileUrl: api.fileUrl ?? undefined,
     fileName: api.fileName ?? undefined,
     fileSize: api.fileSize ?? undefined,

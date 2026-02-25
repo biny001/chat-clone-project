@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if (msgType === "text" && !content?.trim()) {
     return NextResponse.json({ error: "Missing content" }, { status: 400 });
   }
-  if ((msgType === "image" || msgType === "file") && !fileUrl) {
+  if ((msgType === "image" || msgType === "file" || msgType === "audio") && !fileUrl) {
     return NextResponse.json({ error: "Missing fileUrl" }, { status: 400 });
   }
 
@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Persist message and update ChatSession timestamp
+  // Persist message, update ChatSession timestamp, and mark sender's read cursor
+  const now = new Date();
+  const isUser1 = chatSession.user1Id === senderId;
   const [message] = await prisma.$transaction([
     prisma.message.create({
       data: {
@@ -53,7 +55,11 @@ export async function POST(request: NextRequest) {
     }),
     prisma.chatSession.update({
       where: { id: chatSessionId },
-      data: { updatedAt: new Date() },
+      data: {
+        updatedAt: now,
+        // Always advance the sender's read cursor so they never see their own messages as unread
+        ...(isUser1 ? { user1LastReadAt: now } : { user2LastReadAt: now }),
+      },
     }),
   ]);
 
@@ -73,7 +79,7 @@ export async function POST(request: NextRequest) {
   };
 
   const displayContent =
-    msgType === "image" ? "Sent an image" : msgType === "file" ? `Sent a file: ${fileName || "file"}` : message.content;
+    msgType === "image" ? "Sent an image" : msgType === "audio" ? "Sent a voice message" : msgType === "file" ? `Sent a file: ${fileName || "file"}` : message.content;
 
   const conversationUpdateEvent: AblyConversationUpdateEvent = {
     chatSessionId: message.chatSessionId,

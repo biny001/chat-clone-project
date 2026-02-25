@@ -5,21 +5,23 @@ import { X, Phone, Video } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { mediaByMonth, linksByMonth, docsByMonth } from "@/data/mock";
+import { useSharedMedia } from "@/hooks/use-shared-media";
 import { MediaTab, LinksTab, DocsTab } from "./ContactInfoTabs";
 
 interface ContactInfoPanelProps {
   name: string;
   avatar: string;
   email?: string;
+  chatSessionId?: string;
   onClose: () => void;
 }
 
 const tabs = ["Media", "Link", "Docs"] as const;
 type Tab = typeof tabs[number];
 
-export const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProps) => {
+export const ContactInfoPanel = ({ name, avatar, email, chatSessionId, onClose }: ContactInfoPanelProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("Media");
+  const { data: sharedMedia } = useSharedMedia(chatSessionId ?? null);
 
   return (
     <div className="flex flex-col w-[450px] h-full bg-card rounded-3xl p-6 gap-6 shadow-[0px_4px_32px_rgba(0,0,0,0.12)] animate-in slide-in-from-right duration-300">
@@ -81,9 +83,15 @@ export const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPa
         </div>
 
         <ScrollArea className="flex-1">
-          {activeTab === "Media" && <MediaTab mediaByMonth={mediaByMonth} />}
-          {activeTab === "Link" && <LinksTab linksByMonth={linksByMonth} />}
-          {activeTab === "Docs" && <DocsTab docsByMonth={docsByMonth} />}
+          {activeTab === "Media" && (
+            <MediaTab mediaByMonth={sharedMedia?.media ?? []} />
+          )}
+          {activeTab === "Link" && (
+            <LinksTab linksByMonth={sharedMedia?.links ?? []} />
+          )}
+          {activeTab === "Docs" && (
+            <DocsTab filesByMonth={sharedMedia?.files ?? []} />
+          )}
         </ScrollArea>
       </div>
     </div>

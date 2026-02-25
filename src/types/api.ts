@@ -27,6 +27,7 @@ export interface ApiConversation {
   createdAt: string;
   updatedAt: string;
   otherUser: ApiUser;
+  otherUserLastReadAt: string | null;
   lastMessage: ApiMessage | null;
   unreadCount: number;
 }
@@ -35,7 +36,7 @@ export interface ApiConversation {
 export interface SendMessagePayload {
   chatSessionId: string;
   content: string;
-  type?: "text" | "image" | "file";
+  type?: "text" | "image" | "file" | "audio";
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;

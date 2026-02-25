@@ -7,4 +7,5 @@ export { StarFourIcon } from "./StarFourIcon";
 export { LogoIcon } from "./LogoIcon";
 export { MessageIcon } from "./MessageIcon";
 export { ChecksIcon } from "./ChecksIcon";
+export { SingleCheckIcon } from "./SingleCheckIcon";
 export { FileIcon } from "./FileIcon";

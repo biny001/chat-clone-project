@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import ConversationList from "@/components/features/conversations/ConversationList";
 import ChatArea from "@/components/features/chat/ChatArea";
 import ContactInfoPanel from "@/components/features/contact-info/ContactInfoPanel";
@@ -22,8 +22,12 @@ const ChatPage = () => {
   // Conversations
   const { data: conversations, rawData } = useConversationList(onlineUserIds);
 
-  // Messages for active conversation
-  const { data: messages = [] } = useMessages(activeConversationId);
+  // Find the raw API conversation for otherUserLastReadAt
+  const activeRawConversation = rawData.find((c) => c.id === activeConversationId);
+  const otherUserLastReadAt = activeRawConversation?.otherUserLastReadAt ?? null;
+
+  // Messages for active conversation — pass otherUserLastReadAt for read receipts
+  const { data: messages = [] } = useMessages(activeConversationId, otherUserLastReadAt);
   const sendMessage = useSendMessage();
   const editMessage = useEditMessage();
 
@@ -35,24 +39,32 @@ const ChatPage = () => {
   const { isOtherUserTyping, handleTyping } = useTypingIndicator(activeConversationId);
 
   // Mark as read when switching conversations
-  useMarkAsRead(activeConversationId);
+  const { markAsRead } = useMarkAsRead(activeConversationId);
+
+  // Also re-mark as read when new incoming messages arrive
+  const lastIncomingIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!activeConversationId || messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && !lastMsg.sent && lastMsg.id !== lastIncomingIdRef.current) {
+      lastIncomingIdRef.current = lastMsg.id;
+      markAsRead();
+    }
+  }, [messages, activeConversationId, markAsRead]);
 
   // Find active conversation
   const activeConversation = conversations.find((c) => c.id === activeConversationId) ?? null;
-
-  // Find the raw API conversation for email in ContactInfoPanel
-  const activeRawConversation = rawData.find((c) => c.id === activeConversationId);
 
   const handleSendMessage = useCallback((text: string) => {
     if (!activeConversationId) return;
     sendMessage.mutate({ chatSessionId: activeConversationId, content: text });
   }, [activeConversationId, sendMessage]);
 
-  const handleSendFile = useCallback((data: { type: "image" | "file"; fileUrl: string; fileName: string; fileSize: number }) => {
+  const handleSendFile = useCallback((data: { type: "image" | "file" | "audio"; fileUrl: string; fileName: string; fileSize: number }) => {
     if (!activeConversationId) return;
     sendMessage.mutate({
       chatSessionId: activeConversationId,
-      content: data.type === "image" ? "" : data.fileName,
+      content: data.type === "image" ? "" : data.type === "audio" ? "" : data.fileName,
       type: data.type,
       fileUrl: data.fileUrl,
       fileName: data.fileName,
@@ -94,6 +106,7 @@ const ChatPage = () => {
             name={activeConversation.name}
             avatar={activeConversation.avatar}
             email={activeRawConversation?.otherUser.email}
+            chatSessionId={activeConversationId ?? undefined}
             onClose={() => setShowContactInfo(false)}
           />
         </div>

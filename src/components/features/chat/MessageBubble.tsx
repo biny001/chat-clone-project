@@ -2,12 +2,40 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChecksIcon } from "@/components/icons";
+import { ChecksIcon, SingleCheckIcon } from "@/components/icons";
 import { ImageMessage } from "./ImageMessage";
 import { FileMessage } from "./FileMessage";
+import { AudioMessage } from "./AudioMessage";
 import { EditMessageInput } from "./EditMessageInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import type { Message } from "@/types/chat";
+
+// Parse URLs in text and return React elements with clickable links
+function renderTextWithLinks(text: string) {
+  const urlRegex = /(https?:\/\/[^\s<>"']+)/g;
+  const parts = text.split(urlRegex);
+
+  if (parts.length === 1) return text;
+
+  return parts.map((part, i) => {
+    if (urlRegex.test(part)) {
+      // Reset lastIndex because of the global regex
+      urlRegex.lastIndex = 0;
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-2 hover:opacity-80 break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
 
 interface MessageBubbleProps {
   message: Message;
@@ -26,6 +54,11 @@ export const MessageBubble = ({ message, isLast, onEditMessage }: MessageBubbleP
   // Image message
   if (message.type === "image" && message.fileUrl) {
     return <ImageMessage message={message} isLast={isLast} />;
+  }
+
+  // Audio message
+  if (message.type === "audio" && message.fileUrl) {
+    return <AudioMessage message={message} isLast={isLast} />;
   }
 
   // File message
@@ -48,14 +81,14 @@ export const MessageBubble = ({ message, isLast, onEditMessage }: MessageBubbleP
 
   return (
     <MessageContextMenu
-      canEdit={message.sent && message.type !== "image" && message.type !== "file"}
+      canEdit={message.sent && message.type !== "image" && message.type !== "file" && message.type !== "audio"}
       text={message.text}
       onEdit={() => setIsEditing(true)}
     >
       <div className="relative">
         <div
           className={cn(
-            "px-3 py-3 text-xs leading-4 inline-block",
+            "px-3 py-3 text-xs leading-4 inline-block max-w-[400px]",
             message.sent
               ? "bg-accent text-foreground"
               : "bg-card text-foreground",
@@ -64,7 +97,7 @@ export const MessageBubble = ({ message, isLast, onEditMessage }: MessageBubbleP
               : isLast ? "rounded-xl rounded-bl-[4px]" : "rounded-xl"
           )}
         >
-          {message.text}
+          {renderTextWithLinks(message.text)}
           {message.editedAt && (
             <span className="ml-1.5 text-[10px] text-muted-foreground italic">(edited)</span>
           )}
@@ -99,7 +132,8 @@ export const MessageGroup = ({ sent, messages, onEditMessage }: MessageGroupProp
         />
       ))}
       <div className={cn("flex items-center gap-1.5 pt-1", sent ? "justify-end" : "justify-start")}>
-        {sent && lastMessage.read && <ChecksIcon green />}
+        {/* Sent messages: single tick (sent), or double green ticks (read) */}
+        {sent && (lastMessage.read ? <ChecksIcon green /> : <SingleCheckIcon />)}
         <span className="text-xs leading-4 text-muted-foreground">
           {lastMessage.timestamp}
         </span>

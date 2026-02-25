@@ -1,7 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
 
 const f = createUploadthing();
 
@@ -12,8 +11,8 @@ export const ourFileRouter = {
     pdf: { maxFileSize: "4MB", maxFileCount: 1 },
     blob: { maxFileSize: "8MB", maxFileCount: 1 },
   })
-    .middleware(async () => {
-      const session = await auth.api.getSession({ headers: await headers() });
+    .middleware(async ({ req }) => {
+      const session = await auth.api.getSession({ headers: req.headers });
       if (!session) throw new Error("Unauthorized");
       return { userId: session.user.id };
     })
@@ -24,8 +23,8 @@ export const ourFileRouter = {
   profileAvatar: f({
     image: { maxFileSize: "2MB", maxFileCount: 1 },
   })
-    .middleware(async () => {
-      const session = await auth.api.getSession({ headers: await headers() });
+    .middleware(async ({ req }) => {
+      const session = await auth.api.getSession({ headers: req.headers });
       if (!session) throw new Error("Unauthorized");
       return { userId: session.user.id };
     })

@@ -12,7 +12,7 @@ async function fetchMessages(chatSessionId: string): Promise<ApiMessage[]> {
   return res.json();
 }
 
-export function useMessages(chatSessionId: string | null) {
+export function useMessages(chatSessionId: string | null, otherUserLastReadAt?: string | null) {
   const { user } = useAuth();
   const currentUserId = user?.id ?? "";
 
@@ -21,7 +21,7 @@ export function useMessages(chatSessionId: string | null) {
     queryFn: () => fetchMessages(chatSessionId!),
     enabled: !!chatSessionId,
     select: (data: ApiMessage[]): Message[] =>
-      data.map((m) => toMessage(m, currentUserId)),
+      data.map((m) => toMessage(m, currentUserId, otherUserLastReadAt)),
   });
 }
 

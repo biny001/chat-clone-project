@@ -47,7 +47,12 @@ export async function GET() {
   const unreadMap = new Map(unreadCounts.map((u) => [u.id, u.count]));
 
   const conversations = chatSessions.map((cs) => {
-    const otherUser = cs.user1Id === userId ? cs.user2 : cs.user1;
+    const isUser1 = cs.user1Id === userId;
+    const otherUser = isUser1 ? cs.user2 : cs.user1;
+    // The other user's read cursor — tells us which of our sent messages they've seen
+    const otherUserLastReadAt = isUser1
+      ? cs.user2LastReadAt?.toISOString() ?? null
+      : cs.user1LastReadAt?.toISOString() ?? null;
     const lastMessage = cs.messages[0] ?? null;
     return {
       id: cs.id,
@@ -56,6 +61,7 @@ export async function GET() {
       createdAt: cs.createdAt.toISOString(),
       updatedAt: cs.updatedAt.toISOString(),
       otherUser,
+      otherUserLastReadAt,
       lastMessage: lastMessage
         ? {
             id: lastMessage.id,
@@ -111,10 +117,11 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const otherUser =
-    chatSession.user1Id === currentUserId
-      ? chatSession.user2
-      : chatSession.user1;
+  const isUser1 = chatSession.user1Id === currentUserId;
+  const otherUser = isUser1 ? chatSession.user2 : chatSession.user1;
+  const otherUserLastReadAt = isUser1
+    ? chatSession.user2LastReadAt?.toISOString() ?? null
+    : chatSession.user1LastReadAt?.toISOString() ?? null;
   const lastMessage = chatSession.messages[0] ?? null;
 
   return NextResponse.json({
@@ -125,6 +132,7 @@ export async function POST(request: NextRequest) {
       createdAt: chatSession.createdAt.toISOString(),
       updatedAt: chatSession.updatedAt.toISOString(),
       otherUser,
+      otherUserLastReadAt,
       lastMessage: lastMessage
         ? {
             id: lastMessage.id,
