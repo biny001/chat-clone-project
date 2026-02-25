@@ -1,45 +1,15 @@
-import { useState } from "react";
-import IconSidebar from "@/components/chat/IconSidebar";
-import ConversationList from "@/components/chat/ConversationList";
-import ChatArea from "@/components/chat/ChatArea";
-import TopBar from "@/components/chat/TopBar";
-import ContactInfoPanel from "@/components/chat/ContactInfoPanel";
-import { conversations } from "@/data/mockData";
+import ChatLayout from "@/app/chat/layout";
+import ChatPage from "@/app/chat/page";
 
+/**
+ * Index route — composes the chat layout with the chat page,
+ * mirroring how Next.js App Router would render layout.tsx + page.tsx.
+ */
 const Index = () => {
-  const [activeConversationId, setActiveConversationId] = useState("1");
-  const [showContactInfo, setShowContactInfo] = useState(false);
-
-  const conversation = conversations.find((c) => c.id === activeConversationId);
-
   return (
-    <div className="relative flex h-screen w-full overflow-hidden bg-secondary">
-      <IconSidebar />
-      <div className="flex flex-1 flex-col p-3 pl-0 gap-3">
-        <TopBar />
-        <div className="flex flex-1 gap-3 overflow-hidden">
-          <ConversationList
-            activeId={activeConversationId}
-            onSelect={setActiveConversationId}
-          />
-          <ChatArea
-            activeConversationId={activeConversationId}
-            onOpenContactInfo={() => setShowContactInfo(!showContactInfo)}
-          />
-        </div>
-      </div>
-
-      {/* Contact Info Panel - overlays from top, aligned with top bar */}
-      {showContactInfo && conversation && (
-        <div className="absolute right-3 top-3 bottom-3 z-30">
-          <ContactInfoPanel
-            name={conversation.name}
-            avatar={conversation.avatar}
-            onClose={() => setShowContactInfo(false)}
-          />
-        </div>
-      )}
-    </div>
+    <ChatLayout>
+      <ChatPage />
+    </ChatLayout>
   );
 };
 
