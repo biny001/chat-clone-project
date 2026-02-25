@@ -136,18 +136,14 @@ const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProp
                     {group.month}
                   </span>
                 </div>
-                {/* Media grid - 4 cols, gap-1, square items with rounded-lg */}
-                <div className="flex flex-col gap-1">
-                  {chunkArray(group.items, 4).map((row, ri) => (
-                    <div key={ri} className="flex gap-1">
-                      {row.map((bg, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 aspect-square rounded-lg"
-                          style={{ background: bg }}
-                        />
-                      ))}
-                    </div>
+                {/* Media grid - 4 cols, 4px gap, equal square items */}
+                <div className="grid grid-cols-4 gap-1">
+                  {group.items.map((bg, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square rounded-lg"
+                      style={{ background: bg }}
+                    />
                   ))}
                 </div>
               </div>
