@@ -1,18 +1,25 @@
+import { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { conversations } from "@/data/mock";
-import { messages } from "@/data/mock";
 import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 import { MessageGroup, groupMessages } from "./MessageBubble";
+import type { Message } from "@/types/chat";
 
 interface ChatAreaProps {
   activeConversationId: string;
+  messages: Message[];
+  onSendMessage: (text: string) => void;
   onOpenContactInfo?: () => void;
 }
 
-export const ChatArea = ({ activeConversationId, onOpenContactInfo }: ChatAreaProps) => {
+export const ChatArea = ({ activeConversationId, messages: chatMessages, onSendMessage, onOpenContactInfo }: ChatAreaProps) => {
   const conversation = conversations.find((c) => c.id === activeConversationId);
-  const chatMessages = messages[activeConversationId] || [];
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages.length]);
 
   if (!conversation) {
     return (
@@ -40,10 +47,11 @@ export const ChatArea = ({ activeConversationId, onOpenContactInfo }: ChatAreaPr
             {groupedMessages.map((group, gi) => (
               <MessageGroup key={gi} sent={group.sent} messages={group.messages} />
             ))}
+            <div ref={bottomRef} />
           </div>
         </ScrollArea>
 
-        <ChatInput />
+        <ChatInput onSend={onSendMessage} />
       </div>
     </div>
   );
