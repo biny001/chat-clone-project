@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { conversations, messages, type Message } from "@/data/mockData";
+import ContactInfoPanel from "./ContactInfoPanel";
 
 interface ChatAreaProps {
   activeConversationId: string;
@@ -18,6 +19,7 @@ const ChecksIcon = ({ green }: { green?: boolean }) => (
 
 const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
   const [inputValue, setInputValue] = useState("");
+  const [showContactInfo, setShowContactInfo] = useState(false);
   const conversation = conversations.find((c) => c.id === activeConversationId);
   const chatMessages = messages[activeConversationId] || [];
 
@@ -33,22 +35,28 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
   const groupedMessages = groupMessages(chatMessages);
 
   return (
-    <div className="flex flex-1 flex-col rounded-3xl bg-card p-3 overflow-hidden">
+    <div className="flex flex-1 overflow-hidden gap-3">
+      <div className="flex flex-1 flex-col rounded-3xl bg-card p-3 overflow-hidden">
       {/* Chat Header */}
       <div className="flex items-center px-3 pt-1 pb-4 gap-3">
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-semibold">
-            {conversation.avatar}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
-          <h3 className="text-sm font-medium leading-5 tracking-[-0.006em] text-foreground">
-            {conversation.name}
-          </h3>
-          <p className="text-xs font-medium leading-4" style={{ color: "#38C793" }}>
-            {conversation.online ? "Online" : "Offline"}
-          </p>
-        </div>
+        <button
+          onClick={() => setShowContactInfo(!showContactInfo)}
+          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-semibold">
+              {conversation.avatar}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col gap-1 text-left">
+            <h3 className="text-sm font-medium leading-5 tracking-[-0.006em] text-foreground">
+              {conversation.name}
+            </h3>
+            <p className="text-xs font-medium leading-4" style={{ color: "#38C793" }}>
+              {conversation.online ? "Online" : "Offline"}
+            </p>
+          </div>
+        </button>
         <div className="flex items-center gap-3">
           {[Search, Phone, Video, MoreHorizontal].map((Icon, i) => (
             <button
@@ -144,6 +152,16 @@ const ChatArea = ({ activeConversationId }: ChatAreaProps) => {
           </div>
         </div>
       </div>
+    </div>
+
+      {/* Contact Info Panel */}
+      {showContactInfo && (
+        <ContactInfoPanel
+          name={conversation.name}
+          avatar={conversation.avatar}
+          onClose={() => setShowContactInfo(false)}
+        />
+      )}
     </div>
   );
 };
