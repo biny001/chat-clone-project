@@ -60,6 +60,18 @@ const mediaByMonth = [
   },
 ];
 
+const linksByMonth = [
+  {
+    month: "May",
+    links: [
+      { url: "https://basecamp.net/", description: "Discover thousands of premium UI kits, templates, and design resources tailored for designers, developers, and...", color: "#1D1D1F" },
+      { url: "https://notion.com/", description: "A new tool that blends your everyday work apps into one. It's the all-in-one workspace for you and your team.", color: "#E8E5DF" },
+      { url: "https://asana.com/", description: "Work anytime, anywhere with Asana. Keep remote and distributed teams, and your entire organization, focused...", color: "#F06A6A" },
+      { url: "https://trello.com/", description: "Make the impossible, possible with Trello. The ultimate teamwork project management tool. Start up board in se...", color: "#0079BF" },
+    ],
+  },
+];
+
 const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("Media");
 
@@ -125,30 +137,72 @@ const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProp
           ))}
         </div>
 
-        {/* Media content */}
+        {/* Tab content */}
         <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-2">
-            {mediaByMonth.map((group) => (
-              <div key={group.month} className="flex flex-col gap-1">
-                {/* Month header - Figma: px-3 py-2 h-8 rounded-lg bg-[#F8F8F5] */}
-                <div className="flex items-center px-3 py-2 h-8 rounded-lg bg-[#F8F8F5]">
-                  <span className="text-xs font-medium leading-4" style={{ color: "#8B8B8B" }}>
-                    {group.month}
-                  </span>
+          {activeTab === "Media" && (
+            <div className="flex flex-col gap-3">
+              {mediaByMonth.map((group) => (
+                <div key={group.month} className="flex flex-col gap-1">
+                  <div className="flex items-center px-3 py-2 h-8 rounded-lg bg-[#F8F8F5]">
+                    <span className="text-xs font-medium leading-4" style={{ color: "#8B8B8B" }}>
+                      {group.month}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1">
+                    {group.items.map((bg, i) => (
+                      <div
+                        key={i}
+                        className="aspect-square rounded-lg"
+                        style={{ background: bg }}
+                      />
+                    ))}
+                  </div>
                 </div>
-                {/* Media grid - 4 cols, 4px gap, equal square items */}
-                <div className="grid grid-cols-4 gap-1">
-                  {group.items.map((bg, i) => (
-                    <div
-                      key={i}
-                      className="aspect-square rounded-lg"
-                      style={{ background: bg }}
-                    />
-                  ))}
+              ))}
+            </div>
+          )}
+
+          {activeTab === "Link" && (
+            <div className="flex flex-col gap-3">
+              {linksByMonth.map((group) => (
+                <div key={group.month} className="flex flex-col gap-3">
+                  <div className="flex items-center px-3 py-2 h-8 rounded-lg bg-[#F8F8F5]">
+                    <span className="text-xs font-medium leading-4" style={{ color: "#596881" }}>
+                      {group.month}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    {group.links.map((link, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        {/* Logo */}
+                        <div
+                          className="w-[60px] h-[60px] shrink-0 rounded-xl flex items-center justify-center text-white text-xs font-bold"
+                          style={{ backgroundColor: link.color }}
+                        >
+                          {new URL(link.url).hostname.split(".")[0].charAt(0).toUpperCase()}
+                        </div>
+                        {/* Descriptions */}
+                        <div className="flex flex-col gap-1 flex-1 min-w-0">
+                          <span className="text-sm font-medium leading-5 tracking-[-0.006em] truncate" style={{ color: "#111625" }}>
+                            {link.url}
+                          </span>
+                          <span className="text-xs font-normal leading-4 line-clamp-2" style={{ color: "#8B8B8B" }}>
+                            {link.description}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "Docs" && (
+            <div className="flex items-center justify-center py-12">
+              <span className="text-sm" style={{ color: "#8B8B8B" }}>No documents shared yet</span>
+            </div>
+          )}
         </ScrollArea>
       </div>
     </div>
