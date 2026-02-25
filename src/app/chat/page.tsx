@@ -1,18 +1,31 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import ConversationList from "@/components/features/conversations/ConversationList";
 import ChatArea from "@/components/features/chat/ChatArea";
 import ContactInfoPanel from "@/components/features/contact-info/ContactInfoPanel";
-import { conversations } from "@/data/mock";
+import { conversations, messages as initialMessages } from "@/data/mock";
+import type { Message } from "@/types/chat";
 
-/**
- * Chat page — mirrors Next.js `app/(chat)/page.tsx`.
- * Handles active conversation state and contact info panel visibility.
- */
 const ChatPage = () => {
   const [activeConversationId, setActiveConversationId] = useState("1");
   const [showContactInfo, setShowContactInfo] = useState(false);
+  const [allMessages, setAllMessages] = useState<Record<string, Message[]>>(initialMessages);
 
   const conversation = conversations.find((c) => c.id === activeConversationId);
+
+  const handleSendMessage = useCallback((text: string) => {
+    const newMsg: Message = {
+      id: `m-${Date.now()}`,
+      conversationId: activeConversationId,
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      sent: true,
+      read: false,
+    };
+    setAllMessages((prev) => ({
+      ...prev,
+      [activeConversationId]: [...(prev[activeConversationId] || []), newMsg],
+    }));
+  }, [activeConversationId]);
 
   return (
     <>
@@ -22,10 +35,11 @@ const ChatPage = () => {
       />
       <ChatArea
         activeConversationId={activeConversationId}
+        messages={allMessages[activeConversationId] || []}
+        onSendMessage={handleSendMessage}
         onOpenContactInfo={() => setShowContactInfo(!showContactInfo)}
       />
 
-      {/* Contact Info Panel overlay */}
       {showContactInfo && conversation && (
         <div className="absolute right-3 top-3 bottom-3 z-30">
           <ContactInfoPanel
