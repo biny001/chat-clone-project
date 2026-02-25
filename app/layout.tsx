@@ -11,6 +11,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Chatly",
   description: "Chatly - Team messaging",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -52,7 +52,7 @@ export const ImageMessage = ({ message, isLast, onCancelUpload }: ImageMessagePr
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none [&>button]:text-white [&>button]:opacity-100">
           <DialogTitle className="sr-only">Image preview</DialogTitle>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

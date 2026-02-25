@@ -70,7 +70,7 @@ export const VideoMessage = ({ message, isLast, onCancelUpload }: VideoMessagePr
 
       {/* Fullscreen video player dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-black/95 shadow-none">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-black/95 shadow-none [&>button]:text-white [&>button]:opacity-100">
           <DialogTitle className="sr-only">Video player</DialogTitle>
           <video
             src={message.fileUrl}

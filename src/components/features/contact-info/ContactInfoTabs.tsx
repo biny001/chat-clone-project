@@ -64,7 +64,7 @@ export const MediaTab = ({ mediaByMonth }: MediaTabProps) => {
       </div>
 
       <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 border-none bg-transparent shadow-none [&>button]:text-white [&>button]:opacity-100">
           <DialogTitle className="sr-only">Image preview</DialogTitle>
           {lightboxUrl && (
             // eslint-disable-next-line @next/next/no-img-element
