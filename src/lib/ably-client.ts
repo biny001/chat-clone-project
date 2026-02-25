@@ -12,5 +12,6 @@ export function createAblyClient(): Ably.Realtime {
         callback(err instanceof Error ? err.message : "Auth failed", null);
       }
     },
+    autoConnect: false,
   });
 }
