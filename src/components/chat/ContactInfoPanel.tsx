@@ -72,6 +72,37 @@ const linksByMonth = [
   },
 ];
 
+const docsByMonth = [
+  {
+    month: "May",
+    docs: [
+      { name: "Document Requirement.pdf", pages: "10 pages", size: "16 MB", type: "pdf", tagColor: "#FF1607" },
+      { name: "User Flow.pdf", pages: "7 pages", size: "32 MB", type: "pdf", tagColor: "#FF1607" },
+      { name: "Existing App.fig", size: "213 MB", type: "fig", tagColor: "#6E45F0" },
+      { name: "Product Illustrations.ai", size: "72 MB", type: "ai", tagColor: "#FF5C00" },
+      { name: "Quotation-Hikariworks-May.pdf", pages: "2 pages", size: "329 KB", type: "pdf", tagColor: "#FF1607" },
+    ],
+  },
+];
+
+const FileIcon = ({ type, tagColor }: { type: string; tagColor: string }) => (
+  <div className="relative w-[31.5px] h-9">
+    {/* File body */}
+    <div className="absolute left-[14.29%] right-0 top-0 bottom-0 bg-white border-[1.35px] border-[#E8E5DF] rounded-sm" />
+    {/* Fold corner */}
+    <div className="absolute left-[56.67%] right-[3.33%] top-[2.5%] bottom-[67.5%] border-[1.35px] border-[#E8E5DF]" />
+    {/* Tag */}
+    <div
+      className="absolute left-0 bottom-[4.5px] flex items-center justify-center px-[2.25px] py-[1.8px] rounded-[1.8px]"
+      style={{ backgroundColor: tagColor }}
+    >
+      <span className="text-white font-bold uppercase tracking-[-0.02em]" style={{ fontSize: "9px", lineHeight: "11px" }}>
+        {type}
+      </span>
+    </div>
+  </div>
+);
+
 const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("Media");
 
@@ -199,8 +230,43 @@ const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProp
           )}
 
           {activeTab === "Docs" && (
-            <div className="flex items-center justify-center py-12">
-              <span className="text-sm" style={{ color: "#8B8B8B" }}>No documents shared yet</span>
+            <div className="flex flex-col gap-3">
+              {docsByMonth.map((group) => (
+                <div key={group.month} className="flex flex-col gap-3">
+                  <div className="flex items-center px-3 py-2 h-8 rounded-lg bg-[#F8F8F5]">
+                    <span className="text-xs font-medium leading-4" style={{ color: "#596881" }}>
+                      {group.month}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    {group.docs.map((doc, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        {/* File icon */}
+                        <div className="w-[60px] h-[60px] shrink-0 rounded-xl bg-[#F3F3EE] flex items-center justify-center">
+                          <FileIcon type={doc.type} tagColor={doc.tagColor} />
+                        </div>
+                        {/* Descriptions */}
+                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                          <span className="text-sm font-medium leading-5 tracking-[-0.006em] truncate" style={{ color: "#1C1C1C" }}>
+                            {doc.name}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {doc.pages && (
+                              <>
+                                <span className="text-xs font-normal leading-4" style={{ color: "#8B8B8B" }}>{doc.pages}</span>
+                                <span className="text-xs font-normal leading-4" style={{ color: "#8B8B8B" }}>•</span>
+                              </>
+                            )}
+                            <span className="text-xs font-normal leading-4" style={{ color: "#8B8B8B" }}>{doc.size}</span>
+                            <span className="text-xs font-normal leading-4" style={{ color: "#8B8B8B" }}>•</span>
+                            <span className="text-xs font-normal leading-4" style={{ color: "#8B8B8B" }}>{doc.type}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </ScrollArea>
