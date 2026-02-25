@@ -27,6 +27,8 @@ export function useMessages(chatSessionId: string | null, otherUserLastReadAt?: 
 
 export function useSendMessage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const currentUserId = user?.id ?? "";
 
   return useMutation({
     mutationFn: async (payload: SendMessagePayload): Promise<SendMessageResponse> => {
@@ -38,7 +40,42 @@ export function useSendMessage() {
       if (!res.ok) throw new Error("Failed to send message");
       return res.json();
     },
-    onSuccess: (_data, variables) => {
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ["messages", variables.chatSessionId] });
+
+      // Snapshot the previous value
+      const previous = queryClient.getQueryData<ApiMessage[]>(["messages", variables.chatSessionId]);
+
+      // Optimistically add the new message to the cache
+      const optimisticMsg: ApiMessage = {
+        id: `optimistic-${Date.now()}`,
+        chatSessionId: variables.chatSessionId,
+        senderId: currentUserId,
+        content: variables.content,
+        type: variables.type || "text",
+        fileUrl: variables.fileUrl || null,
+        fileName: variables.fileName || null,
+        fileSize: variables.fileSize || null,
+        editedAt: null,
+        createdAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<ApiMessage[]>(
+        ["messages", variables.chatSessionId],
+        (old) => [...(old || []), optimisticMsg]
+      );
+
+      return { previous };
+    },
+    onError: (_err, variables, context) => {
+      // Rollback on error
+      if (context?.previous) {
+        queryClient.setQueryData(["messages", variables.chatSessionId], context.previous);
+      }
+    },
+    onSettled: (_data, _err, variables) => {
+      // Refetch to get the real server data (replaces optimistic entry)
       queryClient.invalidateQueries({ queryKey: ["messages", variables.chatSessionId] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },

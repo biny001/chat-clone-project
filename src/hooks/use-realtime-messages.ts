@@ -22,10 +22,24 @@ export function useRealtimeMessages(chatSessionId: string | null) {
     const onNewMessage = (message: InboundMessage) => {
       const event = message.data as AblyNewMessageEvent;
 
-      // Skip messages sent by current user (already in cache via mutation)
-      if (event.senderId === currentUserId) return;
+      if (event.senderId === currentUserId) {
+        // Own message arrived from server — replace any optimistic entry
+        queryClient.setQueryData<ApiMessage[]>(
+          ["messages", chatSessionId],
+          (old) => {
+            if (!old) return [event as ApiMessage];
+            // Remove optimistic entries and add the real one (if not already present)
+            const withoutOptimistic = old.filter(
+              (m) => !m.id.startsWith("optimistic-")
+            );
+            if (withoutOptimistic.some((m) => m.id === event.id)) return withoutOptimistic;
+            return [...withoutOptimistic, event as ApiMessage];
+          }
+        );
+        return;
+      }
 
-      // Inject into React Query cache
+      // Other user's message — inject into cache
       queryClient.setQueryData<ApiMessage[]>(
         ["messages", chatSessionId],
         (old) => {

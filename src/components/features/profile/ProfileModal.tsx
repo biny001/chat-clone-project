@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,11 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
   const { user } = useAuth();
   const [name, setName] = useState(user?.name ?? "");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Sync name when user data loads (user may be null on first render)
+  useEffect(() => {
+    if (user?.name) setName(user.name);
+  }, [user?.name]);
 
   const handleSave = async () => {
     if (!name.trim() || name.trim() === user?.name) return;

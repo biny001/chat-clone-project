@@ -8,7 +8,10 @@ import { FileMessage } from "./FileMessage";
 import { AudioMessage } from "./AudioMessage";
 import { EditMessageInput } from "./EditMessageInput";
 import { MessageContextMenu } from "./MessageContextMenu";
+import { LinkPreview } from "./LinkPreview";
 import type { Message } from "@/types/chat";
+
+const URL_REGEX = /https?:\/\/[^\s<>"']+/;
 
 // Parse URLs in text and return React elements with clickable links
 function renderTextWithLinks(text: string) {
@@ -79,6 +82,8 @@ export const MessageBubble = ({ message, isLast, onEditMessage }: MessageBubbleP
     );
   }
 
+  const hasUrl = URL_REGEX.test(message.text);
+
   return (
     <MessageContextMenu
       canEdit={message.sent && message.type !== "image" && message.type !== "file" && message.type !== "audio"}
@@ -101,6 +106,7 @@ export const MessageBubble = ({ message, isLast, onEditMessage }: MessageBubbleP
           {message.editedAt && (
             <span className="ml-1.5 text-[10px] text-muted-foreground italic">(edited)</span>
           )}
+          {hasUrl && <LinkPreview text={message.text} sent={message.sent} />}
         </div>
         {message.reaction && (
           <span className="absolute left-2 -bottom-3 bg-card rounded-full w-5 h-5 flex items-center justify-center text-xs z-10">
