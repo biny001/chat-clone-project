@@ -10,7 +10,13 @@
       "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx prisma generate 2>&1)",
       "Bash(head:*)",
       "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx tsc --noEmit 2>&1)",
-      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx prisma db push 2>&1)"
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx prisma db push 2>&1)",
+      "WebFetch(domain:ably.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:faqs.ably.com)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm i ably 2>&1)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm approve-builds prisma @prisma/engines 2>&1)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm run build 2>&1)"
     ]
   }
 }

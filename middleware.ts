@@ -32,12 +32,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except:
-     * - api/auth (Better Auth handles these)
+     * - api/ (API routes handle their own auth)
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico, sitemap.xml, robots.txt
      * - public files with extensions (images, etc.)
      */
-    "/((?!api/auth|_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!api/|_next/static|_next/image|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

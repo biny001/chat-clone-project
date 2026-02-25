@@ -3,20 +3,20 @@
 import { useState } from "react";
 import { Search, Filter, PenLine } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { conversations } from "@/data/mock";
-import { contacts } from "@/data/mock";
 import { ConversationItem } from "./ConversationItem";
 import { NewMessagePopup } from "./NewMessagePopup";
+import type { Conversation } from "@/types/chat";
 
 interface ConversationListProps {
-  activeId: string;
+  activeId: string | null;
   onSelect: (id: string) => void;
+  conversations: Conversation[];
+  onConversationCreated: (id: string) => void;
 }
 
-export const ConversationList = ({ activeId, onSelect }: ConversationListProps) => {
+export const ConversationList = ({ activeId, onSelect, conversations, onConversationCreated }: ConversationListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewMessage, setShowNewMessage] = useState(false);
-  const [contactSearch, setContactSearch] = useState("");
 
   const filtered = conversations.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -28,10 +28,7 @@ export const ConversationList = ({ activeId, onSelect }: ConversationListProps) 
       <div className="relative flex items-center justify-between">
         <h2 className="text-xl font-semibold text-foreground leading-[30px] tracking-[-0.006em]">All Message</h2>
         <button
-          onClick={() => {
-            setShowNewMessage((v) => !v);
-            setContactSearch("");
-          }}
+          onClick={() => setShowNewMessage((v) => !v)}
           className="flex items-center justify-center gap-1.5 h-8 px-2 rounded-lg text-sm font-medium text-white"
           style={{
             background: "linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 100%), #1E9A80",
@@ -45,10 +42,11 @@ export const ConversationList = ({ activeId, onSelect }: ConversationListProps) 
 
         <NewMessagePopup
           open={showNewMessage}
-          onClose={() => { setShowNewMessage(false); setContactSearch(""); }}
-          contacts={contacts}
-          searchQuery={contactSearch}
-          onSearchChange={setContactSearch}
+          onClose={() => setShowNewMessage(false)}
+          onConversationCreated={(id) => {
+            onConversationCreated(id);
+            setShowNewMessage(false);
+          }}
         />
       </div>
 

@@ -2,21 +2,21 @@
 
 import { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { conversations } from "@/data/mock";
 import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 import { MessageGroup, groupMessages } from "./MessageBubble";
-import type { Message } from "@/types/chat";
+import type { Conversation, Message } from "@/types/chat";
 
 interface ChatAreaProps {
-  activeConversationId: string;
+  conversation: Conversation | null;
   messages: Message[];
   onSendMessage: (text: string) => void;
   onOpenContactInfo?: () => void;
+  isOtherUserTyping?: boolean;
+  onTyping?: () => void;
 }
 
-export const ChatArea = ({ activeConversationId, messages: chatMessages, onSendMessage, onOpenContactInfo }: ChatAreaProps) => {
-  const conversation = conversations.find((c) => c.id === activeConversationId);
+export const ChatArea = ({ conversation, messages: chatMessages, onSendMessage, onOpenContactInfo, isOtherUserTyping, onTyping }: ChatAreaProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const ChatArea = ({ activeConversationId, messages: chatMessages, onSendM
   return (
     <div className="flex flex-1 overflow-hidden">
       <div className="flex flex-1 flex-col rounded-3xl bg-card p-3 overflow-hidden">
-        <ChatHeader conversation={conversation} onOpenContactInfo={onOpenContactInfo} />
+        <ChatHeader conversation={conversation} onOpenContactInfo={onOpenContactInfo} isOtherUserTyping={isOtherUserTyping} />
 
         <ScrollArea className="flex-1 rounded-2xl bg-secondary">
           <div className="flex flex-col justify-end min-h-full p-3 gap-3">
@@ -53,7 +53,7 @@ export const ChatArea = ({ activeConversationId, messages: chatMessages, onSendM
           </div>
         </ScrollArea>
 
-        <ChatInput onSend={onSendMessage} />
+        <ChatInput onSend={onSendMessage} onTyping={onTyping} />
       </div>
     </div>
   );

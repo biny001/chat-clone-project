@@ -7,9 +7,10 @@ import type { Conversation } from "@/types/chat";
 interface ChatHeaderProps {
   conversation: Conversation;
   onOpenContactInfo?: () => void;
+  isOtherUserTyping?: boolean;
 }
 
-export const ChatHeader = ({ conversation, onOpenContactInfo }: ChatHeaderProps) => {
+export const ChatHeader = ({ conversation, onOpenContactInfo, isOtherUserTyping }: ChatHeaderProps) => {
   return (
     <div className="flex items-center px-3 pt-1 pb-4 gap-3">
       <button
@@ -26,7 +27,7 @@ export const ChatHeader = ({ conversation, onOpenContactInfo }: ChatHeaderProps)
             {conversation.name}
           </h3>
           <p className="text-xs font-medium leading-4" style={{ color: "#38C793" }}>
-            {conversation.online ? "Online" : "Offline"}
+            {isOtherUserTyping ? "typing..." : conversation.online ? "Online" : "Offline"}
           </p>
         </div>
       </button>

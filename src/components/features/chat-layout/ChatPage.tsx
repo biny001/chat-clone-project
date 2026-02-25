@@ -4,49 +4,72 @@ import { useState, useCallback } from "react";
 import ConversationList from "@/components/features/conversations/ConversationList";
 import ChatArea from "@/components/features/chat/ChatArea";
 import ContactInfoPanel from "@/components/features/contact-info/ContactInfoPanel";
-import { conversations, messages as initialMessages } from "@/data/mock";
-import type { Message } from "@/types/chat";
+import { useConversationList } from "@/hooks/use-conversations";
+import { useMessages, useSendMessage } from "@/hooks/use-messages";
+import { useRealtimeMessages } from "@/hooks/use-realtime-messages";
+import { useRealtimeConversations } from "@/hooks/use-realtime-conversations";
+import { useTypingIndicator } from "@/hooks/use-typing-indicator";
+import { useOnlineUsers } from "@/hooks/use-online-status";
 
 const ChatPage = () => {
-  const [activeConversationId, setActiveConversationId] = useState("1");
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [showContactInfo, setShowContactInfo] = useState(false);
-  const [allMessages, setAllMessages] = useState<Record<string, Message[]>>(initialMessages);
 
-  const conversation = conversations.find((c) => c.id === activeConversationId);
+  // Online status
+  const onlineUserIds = useOnlineUsers();
+
+  // Conversations
+  const { data: conversations, rawData } = useConversationList(onlineUserIds);
+
+  // Messages for active conversation
+  const { data: messages = [] } = useMessages(activeConversationId);
+  const sendMessage = useSendMessage();
+
+  // Real-time subscriptions
+  useRealtimeMessages(activeConversationId);
+  useRealtimeConversations();
+
+  // Typing indicator
+  const { isOtherUserTyping, handleTyping } = useTypingIndicator(activeConversationId);
+
+  // Find active conversation
+  const activeConversation = conversations.find((c) => c.id === activeConversationId) ?? null;
+
+  // Find the raw API conversation for email in ContactInfoPanel
+  const activeRawConversation = rawData.find((c) => c.id === activeConversationId);
 
   const handleSendMessage = useCallback((text: string) => {
-    const newMsg: Message = {
-      id: `m-${Date.now()}`,
-      conversationId: activeConversationId,
-      text,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      sent: true,
-      read: false,
-    };
-    setAllMessages((prev) => ({
-      ...prev,
-      [activeConversationId]: [...(prev[activeConversationId] || []), newMsg],
-    }));
-  }, [activeConversationId]);
+    if (!activeConversationId) return;
+    sendMessage.mutate({ chatSessionId: activeConversationId, content: text });
+  }, [activeConversationId, sendMessage]);
+
+  const handleConversationCreated = useCallback((id: string) => {
+    setActiveConversationId(id);
+  }, []);
 
   return (
     <>
       <ConversationList
         activeId={activeConversationId}
         onSelect={setActiveConversationId}
+        conversations={conversations}
+        onConversationCreated={handleConversationCreated}
       />
       <ChatArea
-        activeConversationId={activeConversationId}
-        messages={allMessages[activeConversationId] || []}
+        conversation={activeConversation}
+        messages={messages}
         onSendMessage={handleSendMessage}
         onOpenContactInfo={() => setShowContactInfo(!showContactInfo)}
+        isOtherUserTyping={isOtherUserTyping}
+        onTyping={handleTyping}
       />
 
-      {showContactInfo && conversation && (
+      {showContactInfo && activeConversation && (
         <div className="absolute right-3 top-3 bottom-3 z-30">
           <ContactInfoPanel
-            name={conversation.name}
-            avatar={conversation.avatar}
+            name={activeConversation.name}
+            avatar={activeConversation.avatar}
+            email={activeRawConversation?.otherUser.email}
             onClose={() => setShowContactInfo(false)}
           />
         </div>

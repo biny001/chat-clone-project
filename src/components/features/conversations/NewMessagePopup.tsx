@@ -1,29 +1,34 @@
 "use client";
 
-import { useRef } from "react";
-import { Search } from "lucide-react";
+import { useRef, useState } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import type { Contact } from "@/types/chat";
+import { useUserSearch } from "@/hooks/use-user-search";
+import { useCreateConversation } from "@/hooks/use-conversations";
 
 interface NewMessagePopupProps {
   open: boolean;
   onClose: () => void;
-  contacts: Contact[];
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
+  onConversationCreated: (id: string) => void;
 }
 
-export const NewMessagePopup = ({ open, onClose, contacts, searchQuery, onSearchChange }: NewMessagePopupProps) => {
+export const NewMessagePopup = ({ open, onClose, onConversationCreated }: NewMessagePopupProps) => {
   const popupRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   useClickOutside(popupRef, onClose, open);
+  const { data: contacts = [], isLoading } = useUserSearch(searchQuery);
+  const createConversation = useCreateConversation();
 
   if (!open) return null;
 
-  const filtered = contacts.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleContactClick = async (userId: string) => {
+    const result = await createConversation.mutateAsync(userId);
+    onConversationCreated(result.chatSession.id);
+    setSearchQuery("");
+    onClose();
+  };
 
   return (
     <div
@@ -38,7 +43,7 @@ export const NewMessagePopup = ({ open, onClose, contacts, searchQuery, onSearch
           <input
             placeholder="Search name or email"
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
             autoFocus
           />
@@ -46,11 +51,20 @@ export const NewMessagePopup = ({ open, onClose, contacts, searchQuery, onSearch
 
         <ScrollArea className="max-h-[328px]">
           <div className="flex flex-col gap-1">
-            {filtered.map((contact) => (
+            {isLoading && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 size={16} className="animate-spin text-muted-foreground" />
+              </div>
+            )}
+            {!isLoading && searchQuery && contacts.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">No users found</p>
+            )}
+            {contacts.map((contact) => (
               <button
                 key={contact.id}
-                onClick={onClose}
-                className="flex items-center gap-2.5 px-2 py-[6px] rounded-lg hover:bg-[hsl(60,14%,94%)] transition-colors w-full text-left"
+                onClick={() => handleContactClick(contact.id)}
+                disabled={createConversation.isPending}
+                className="flex items-center gap-2.5 px-2 py-[6px] rounded-lg hover:bg-[hsl(60,14%,94%)] transition-colors w-full text-left disabled:opacity-50"
               >
                 <Avatar className="h-8 w-8 shrink-0">
                   <AvatarFallback className="text-[10px] font-semibold text-foreground bg-muted">

@@ -5,9 +5,10 @@ import { Mic, Smile, Paperclip, Send } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
+  onTyping?: () => void;
 }
 
-export const ChatInput = ({ onSend }: ChatInputProps) => {
+export const ChatInput = ({ onSend, onTyping }: ChatInputProps) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleSubmit = (e?: FormEvent) => {
@@ -25,7 +26,10 @@ export const ChatInput = ({ onSend }: ChatInputProps) => {
           type="text"
           placeholder="Type any message..."
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            onTyping?.();
+          }}
           className="flex-1 bg-transparent text-xs leading-4 text-foreground placeholder:text-muted-foreground outline-none"
         />
         <div className="flex items-center gap-2">
