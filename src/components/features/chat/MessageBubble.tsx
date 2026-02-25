@@ -10,6 +10,7 @@ import { AudioMessage } from "./AudioMessage";
 import { EditMessageInput } from "./EditMessageInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { LinkPreview } from "./LinkPreview";
+import { ReplyPreview } from "./ReplyPreview";
 import type { Message } from "@/types/chat";
 
 const URL_REGEX = /https?:\/\/[^\s<>"']+/;
@@ -46,9 +47,10 @@ interface MessageBubbleProps {
   isLast: boolean;
   onEditMessage?: (id: string, content: string) => void;
   onCancelUpload?: (id: string) => void;
+  onReply?: (message: Message) => void;
 }
 
-export const MessageBubble = ({ message, isLast, onEditMessage, onCancelUpload }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, isLast, onEditMessage, onCancelUpload, onReply }: MessageBubbleProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleSaveEdit = (content: string) => {
@@ -57,25 +59,63 @@ export const MessageBubble = ({ message, isLast, onEditMessage, onCancelUpload }
   };
 
   const handleCancelUpload = onCancelUpload ? () => onCancelUpload(message.id) : undefined;
+  const handleReply = onReply ? () => onReply(message) : undefined;
+
+  const replyBlock = message.replyToId && message.replyToSender ? (
+    <ReplyPreview
+      senderName={message.replyToSender}
+      text={message.replyToText || ""}
+      type={message.replyToType}
+      sent={message.sent}
+    />
+  ) : null;
 
   // Image message
   if (message.type === "image" && message.fileUrl) {
-    return <ImageMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />;
+    return (
+      <MessageContextMenu canEdit={false} text="" onEdit={() => {}} onReply={handleReply}>
+        <div>
+          {replyBlock}
+          <ImageMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />
+        </div>
+      </MessageContextMenu>
+    );
   }
 
   // Video message
   if (message.type === "video" && message.fileUrl) {
-    return <VideoMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />;
+    return (
+      <MessageContextMenu canEdit={false} text="" onEdit={() => {}} onReply={handleReply}>
+        <div>
+          {replyBlock}
+          <VideoMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />
+        </div>
+      </MessageContextMenu>
+    );
   }
 
   // Audio message
   if (message.type === "audio" && message.fileUrl) {
-    return <AudioMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />;
+    return (
+      <MessageContextMenu canEdit={false} text="" onEdit={() => {}} onReply={handleReply}>
+        <div>
+          {replyBlock}
+          <AudioMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />
+        </div>
+      </MessageContextMenu>
+    );
   }
 
   // File message
   if (message.type === "file" && message.fileUrl) {
-    return <FileMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />;
+    return (
+      <MessageContextMenu canEdit={false} text={message.fileName || ""} onEdit={() => {}} onReply={handleReply}>
+        <div>
+          {replyBlock}
+          <FileMessage message={message} isLast={isLast} onCancelUpload={handleCancelUpload} />
+        </div>
+      </MessageContextMenu>
+    );
   }
 
   // Text message (default)
@@ -98,8 +138,10 @@ export const MessageBubble = ({ message, isLast, onEditMessage, onCancelUpload }
       canEdit={message.sent && message.type !== "image" && message.type !== "video" && message.type !== "file" && message.type !== "audio"}
       text={message.text}
       onEdit={() => setIsEditing(true)}
+      onReply={handleReply}
     >
       <div className="relative">
+        {replyBlock}
         <div
           className={cn(
             "px-3 py-3 text-xs leading-4 inline-block max-w-[400px]",
@@ -132,9 +174,10 @@ interface MessageGroupProps {
   messages: Message[];
   onEditMessage?: (id: string, content: string) => void;
   onCancelUpload?: (id: string) => void;
+  onReply?: (message: Message) => void;
 }
 
-export const MessageGroup = ({ sent, messages, onEditMessage, onCancelUpload }: MessageGroupProps) => {
+export const MessageGroup = ({ sent, messages, onEditMessage, onCancelUpload, onReply }: MessageGroupProps) => {
   const lastMessage = messages[messages.length - 1];
 
   return (
@@ -146,6 +189,7 @@ export const MessageGroup = ({ sent, messages, onEditMessage, onCancelUpload }: 
           isLast={mi === messages.length - 1}
           onEditMessage={onEditMessage}
           onCancelUpload={onCancelUpload}
+          onReply={onReply}
         />
       ))}
       <div className={cn("flex items-center gap-1.5 pt-1", sent ? "justify-end" : "justify-start")}>

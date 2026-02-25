@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, type FormEvent, type ClipboardEvent } from "react";
-import { Mic, Smile, Paperclip, Send, Square, Trash2, Loader2, Play, Pause } from "lucide-react";
+import { Mic, Smile, Paperclip, Send, Square, Trash2, Loader2, Play, Pause, X, Image, Video, FileText, MicIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import type { Message } from "@/types/chat";
 
 export interface StagedFile {
   file: File;
@@ -21,6 +22,8 @@ interface ChatInputProps {
   onClearStaged?: () => void;
   /** Upload files with in-chat progress (bypasses preview overlay) */
   onDirectFileUpload?: (files: File[]) => void;
+  replyTo?: Message | null;
+  onCancelReply?: () => void;
 }
 
 export const ChatInput = ({
@@ -29,6 +32,8 @@ export const ChatInput = ({
   onStageFiles,
   stagedFiles = [],
   onDirectFileUpload,
+  replyTo,
+  onCancelReply,
 }: ChatInputProps) => {
   const [inputValue, setInputValue] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -330,12 +335,64 @@ export const ChatInput = ({
     );
   }
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus input when replying
+  useEffect(() => {
+    if (replyTo) inputRef.current?.focus();
+  }, [replyTo]);
+
+  function getReplyTypeIcon(type?: string) {
+    switch (type) {
+      case "image": return <Image size={12} className="shrink-0 text-primary" />;
+      case "video": return <Video size={12} className="shrink-0 text-primary" />;
+      case "audio": return <MicIcon size={12} className="shrink-0 text-primary" />;
+      case "file": return <FileText size={12} className="shrink-0 text-primary" />;
+      default: return null;
+    }
+  }
+
+  function getReplyDisplayText(msg: Message) {
+    switch (msg.type) {
+      case "image": return "Photo";
+      case "video": return "Video";
+      case "audio": return "Voice message";
+      case "file": return msg.fileName || "File";
+      default: return msg.text;
+    }
+  }
+
   // === Default text input ===
   return (
     <form onSubmit={handleSubmit} className="pt-3">
       {fileInputs}
+      {/* Reply bar */}
+      {replyTo && (
+        <div className="flex items-stretch mb-2 rounded-xl overflow-hidden bg-muted/60">
+          <div className="w-1 shrink-0 bg-primary" />
+          <div className="flex-1 flex flex-col gap-0.5 px-3 py-2 min-w-0">
+            <span className="text-[11px] font-semibold text-primary truncate">
+              {replyTo.sent ? "You" : "Reply"}
+            </span>
+            <div className="flex items-center gap-1">
+              {replyTo.type && replyTo.type !== "text" && getReplyTypeIcon(replyTo.type)}
+              <span className="text-[11px] text-muted-foreground truncate">
+                {getReplyDisplayText(replyTo)}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onCancelReply}
+            className="px-3 flex items-center justify-center hover:bg-muted transition-colors"
+          >
+            <X size={14} className="text-muted-foreground" />
+          </button>
+        </div>
+      )}
       <div className="flex items-center rounded-full border border-border pl-4 pr-1 py-1 gap-1 h-10">
         <input
+          ref={inputRef}
           type="text"
           placeholder="Type any message..."
           value={inputValue}

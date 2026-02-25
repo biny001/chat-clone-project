@@ -40,12 +40,13 @@ function detectFileType(file: File): MediaType {
 interface ChatAreaProps {
   conversation: Conversation | null;
   messages: Message[];
-  onSendMessage: (text: string) => void;
+  onSendMessage: (text: string, replyToId?: string) => void;
   onSendFile?: (data: { type: MediaType; fileUrl: string; fileName: string; fileSize: number }) => void;
   onEditMessage?: (id: string, content: string) => void;
   onOpenContactInfo?: () => void;
   isOtherUserTyping?: boolean;
   onTyping?: () => void;
+  onBack?: () => void;
 }
 
 export const ChatArea = ({
@@ -57,6 +58,7 @@ export const ChatArea = ({
   onOpenContactInfo,
   isOtherUserTyping,
   onTyping,
+  onBack,
 }: ChatAreaProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const addMoreRef = useRef<HTMLInputElement>(null);
@@ -64,6 +66,7 @@ export const ChatArea = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
   const [uploadingMessages, setUploadingMessages] = useState<UploadingMessage[]>([]);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
 
   // Ref to store pending file metadata for correlating with upload results
   const pendingFilesRef = useRef<{ id: string; file: File; type: MediaType; localUrl: string }[]>([]);
@@ -77,34 +80,67 @@ export const ChatArea = ({
         prev.map((m) => ({ ...m, progress }))
       );
     },
-    onClientUploadComplete: (res) => {
-      if (res && res.length > 0) {
-        for (const file of res) {
-          // Match type from our pending files ref (most reliable)
-          const pending = pendingFilesRef.current.find((p) => p.file.name === file.name);
-          let type: MediaType = pending?.type ?? "file";
-          if (!pending) {
-            // Fallback detection — check audio before video (webm ambiguity)
-            if (file.type?.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name)) {
-              type = "image";
-            } else if (file.type?.startsWith("audio/") || /\.(mp3|ogg|wav|m4a|flac)$/i.test(file.name) || /^voice-.*\.webm$/i.test(file.name)) {
-              type = "audio";
-            } else if (file.type?.startsWith("video/") || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name)) {
-              type = "video";
-            }
+    onClientUploadComplete: async (res) => {
+      if (!res || res.length === 0) {
+        for (const um of pendingFilesRef.current) URL.revokeObjectURL(um.localUrl);
+        pendingFilesRef.current = [];
+        setUploadingMessages([]);
+        return;
+      }
+
+      // Preload remote URLs so the browser caches them before we swap
+      const preloadPromises: Promise<void>[] = [];
+      const fileData: { type: MediaType; fileUrl: string; fileName: string; fileSize: number }[] = [];
+
+      for (const file of res) {
+        const pending = pendingFilesRef.current.find((p) => p.file.name === file.name);
+        let type: MediaType = pending?.type ?? "file";
+        if (!pending) {
+          if (file.type?.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name)) {
+            type = "image";
+          } else if (file.type?.startsWith("audio/") || /\.(mp3|ogg|wav|m4a|flac)$/i.test(file.name) || /^voice-.*\.webm$/i.test(file.name)) {
+            type = "audio";
+          } else if (file.type?.startsWith("video/") || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name)) {
+            type = "video";
           }
-          onSendFile?.({
-            type,
-            fileUrl: file.ufsUrl,
-            fileName: file.name,
-            fileSize: file.size,
-          });
+        }
+
+        fileData.push({ type, fileUrl: file.ufsUrl, fileName: file.name, fileSize: file.size });
+
+        // Preload images/videos so the browser caches them before the swap
+        if (type === "image") {
+          preloadPromises.push(
+            new Promise<void>((resolve) => {
+              const img = new Image();
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+              img.src = file.ufsUrl;
+            })
+          );
+        } else if (type === "video") {
+          preloadPromises.push(
+            new Promise<void>((resolve) => {
+              const video = document.createElement("video");
+              video.preload = "metadata";
+              video.onloadeddata = () => resolve();
+              video.onerror = () => resolve();
+              video.src = file.ufsUrl;
+            })
+          );
         }
       }
-      // Clean up uploading messages and revoke blob URLs
-      for (const um of pendingFilesRef.current) {
-        URL.revokeObjectURL(um.localUrl);
+
+      // Wait for preloads (with a timeout so we don't hang forever)
+      await Promise.race([
+        Promise.all(preloadPromises),
+        new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+      ]);
+
+      // Now send the real messages and clean up
+      for (const data of fileData) {
+        onSendFile?.(data);
       }
+      for (const um of pendingFilesRef.current) URL.revokeObjectURL(um.localUrl);
       pendingFilesRef.current = [];
       setUploadingMessages([]);
     },
@@ -139,11 +175,12 @@ export const ChatArea = ({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages.length, uploadingMessages.length, isOtherUserTyping]);
 
-  // Reset search + staged files when conversation changes
+  // Reset search + staged files + reply when conversation changes
   useEffect(() => {
     setSearchOpen(false);
     setSearchQuery("");
     setStagedFiles([]);
+    setReplyTo(null);
   }, [conversation?.id]);
 
   const handleStageFiles = useCallback((files: StagedFile[]) => {
@@ -249,6 +286,24 @@ export const ChatArea = ({
     [onSendFile]
   );
 
+  // Reply handler
+  const handleReply = useCallback((message: Message) => {
+    setReplyTo(message);
+  }, []);
+
+  const handleCancelReply = useCallback(() => {
+    setReplyTo(null);
+  }, []);
+
+  // Wrap onSendMessage to include replyToId
+  const handleSendWithReply = useCallback(
+    (text: string) => {
+      onSendMessage(text, replyTo?.id);
+      setReplyTo(null);
+    },
+    [onSendMessage, replyTo]
+  );
+
   // Handle non-image file upload with progress (from ChatInput paperclip)
   const handleDirectFileUpload = useCallback(
     async (files: File[]) => {
@@ -281,7 +336,7 @@ export const ChatArea = ({
 
   if (!conversation) {
     return (
-      <div className="flex flex-1 items-center justify-center rounded-3xl bg-card">
+      <div className="flex flex-1 items-center justify-center rounded-none md:rounded-3xl bg-card">
         <p className="text-muted-foreground text-sm">Select a conversation to start messaging</p>
       </div>
     );
@@ -292,7 +347,7 @@ export const ChatArea = ({
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="flex flex-1 flex-col rounded-3xl bg-card p-3 overflow-hidden">
+      <div className="flex flex-1 flex-col rounded-none md:rounded-3xl bg-card p-2 md:p-3 overflow-hidden">
         <ChatHeader
           conversation={conversation}
           onOpenContactInfo={onOpenContactInfo}
@@ -305,9 +360,10 @@ export const ChatArea = ({
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           searchMatchCount={matchCount}
+          onBack={onBack}
         />
 
-        <div className="flex-1 relative rounded-2xl bg-secondary overflow-hidden">
+        <div className="flex-1 relative rounded-xl md:rounded-2xl bg-secondary overflow-hidden">
           {/* Hidden file input for "add more" in preview */}
           <input
             ref={addMoreRef}
@@ -332,7 +388,7 @@ export const ChatArea = ({
 
           {/* Messages area */}
           <ScrollArea className="h-full">
-            <div className="flex flex-col justify-end min-h-full p-3 gap-3">
+            <div className="flex flex-col justify-end min-h-full p-2 md:p-3 gap-2 md:gap-3">
               <div className="flex justify-center">
                 <span
                   className="px-3 py-1 rounded-full bg-card text-sm font-medium leading-5 tracking-[-0.006em]"
@@ -349,6 +405,7 @@ export const ChatArea = ({
                   messages={group.messages}
                   onEditMessage={onEditMessage}
                   onCancelUpload={handleCancelUpload}
+                  onReply={handleReply}
                 />
               ))}
               {isOtherUserTyping && <TypingBubble />}
@@ -358,13 +415,15 @@ export const ChatArea = ({
         </div>
 
         <ChatInput
-          onSend={onSendMessage}
+          onSend={handleSendWithReply}
           onSendFile={handleSendFileFromInput}
           onTyping={onTyping}
           onStageFiles={handleStageFiles}
           stagedFiles={stagedFiles}
           onClearStaged={handleCancelStaged}
           onDirectFileUpload={handleDirectFileUpload}
+          replyTo={replyTo}
+          onCancelReply={handleCancelReply}
         />
       </div>
     </div>

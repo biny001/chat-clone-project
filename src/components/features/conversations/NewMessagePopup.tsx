@@ -33,7 +33,7 @@ export const NewMessagePopup = ({ open, onClose, onConversationCreated }: NewMes
   return (
     <div
       ref={popupRef}
-      className="absolute right-0 top-full mt-2 z-50 flex flex-col items-center p-3 w-[273px] bg-card border border-border rounded-2xl shadow-[0px_0px_24px_rgba(0,0,0,0.06)]"
+      className="absolute right-0 top-full mt-2 z-50 flex flex-col items-center p-3 w-[calc(100vw-2rem)] md:w-[273px] max-w-[273px] bg-card border border-border rounded-2xl shadow-[0px_0px_24px_rgba(0,0,0,0.06)]"
     >
       <div className="flex flex-col w-full gap-4">
         <h3 className="text-sm font-semibold text-foreground px-2">New Message</h3>

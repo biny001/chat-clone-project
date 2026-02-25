@@ -23,10 +23,10 @@ export const ConversationList = ({ activeId, onSelect, conversations, onConversa
   );
 
   return (
-    <div className="flex h-full w-[400px] flex-col rounded-3xl bg-card p-6 gap-6">
+    <div className="flex h-full w-full md:w-[400px] flex-col rounded-none md:rounded-3xl bg-card p-4 pt-6 md:p-6 gap-4 md:gap-6">
       {/* Header */}
       <div className="relative flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground leading-[30px] tracking-[-0.006em]">All Message</h2>
+        <h2 className="text-lg md:text-xl font-semibold text-foreground leading-[30px] tracking-[-0.006em]">All Message</h2>
         <button
           onClick={() => setShowNewMessage((v) => !v)}
           className="flex items-center justify-center gap-1.5 h-8 px-2 rounded-lg text-sm font-medium text-white"
@@ -51,7 +51,7 @@ export const ConversationList = ({ activeId, onSelect, conversations, onConversa
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         <div className="flex flex-1 items-center gap-2 rounded-[10px] border border-border px-2.5 h-10">
           <Search size={16} className="shrink-0 text-foreground" />
           <input

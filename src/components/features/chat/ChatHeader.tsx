@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Phone, Video, MoreHorizontal, X } from "lucide-react";
+import { Search, Phone, Video, MoreHorizontal, X, ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Conversation } from "@/types/chat";
 
@@ -13,6 +13,7 @@ interface ChatHeaderProps {
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   searchMatchCount?: number;
+  onBack?: () => void;
 }
 
 export const ChatHeader = ({
@@ -24,20 +25,29 @@ export const ChatHeader = ({
   searchQuery,
   onSearchChange,
   searchMatchCount,
+  onBack,
 }: ChatHeaderProps) => {
   return (
     <div>
-      <div className="flex items-center px-3 pt-1 pb-4 gap-3">
+      <div className="flex items-center px-2 md:px-3 pt-1 pb-3 md:pb-4 gap-2 md:gap-3">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 md:hidden"
+          >
+            <ArrowLeft size={20} className="text-foreground" />
+          </button>
+        )}
         <button
           onClick={onOpenContactInfo}
-          className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
         >
-          <Avatar className="h-10 w-10 shrink-0">
+          <Avatar className="h-9 w-9 md:h-10 md:w-10 shrink-0">
             <AvatarFallback className="bg-primary text-primary-foreground text-[11px] font-semibold">
               {conversation.avatar}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col gap-1 text-left">
+          <div className="flex flex-col gap-0.5 md:gap-1 text-left">
             <h3 className="text-sm font-medium leading-5 tracking-[-0.006em] text-foreground">
               {conversation.name}
             </h3>
@@ -49,7 +59,7 @@ export const ChatHeader = ({
             </p>
           </div>
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 md:gap-3">
           <button
             onClick={onToggleSearch}
             className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-card"
@@ -59,7 +69,7 @@ export const ChatHeader = ({
           {[Phone, Video, MoreHorizontal].map((Icon, i) => (
             <button
               key={i}
-              className="flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-card"
+              className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg border border-border bg-card"
             >
               <Icon size={16} className="text-foreground" />
             </button>

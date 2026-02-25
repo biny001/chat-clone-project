@@ -24,7 +24,7 @@ export const ContactInfoPanel = ({ name, avatar, email, chatSessionId, onClose }
   const { data: sharedMedia } = useSharedMedia(chatSessionId ?? null);
 
   return (
-    <div className="flex flex-col w-[450px] h-full bg-card rounded-3xl p-6 gap-6 shadow-[0px_4px_32px_rgba(0,0,0,0.12)] animate-in slide-in-from-right duration-300">
+    <div className="flex flex-col w-full md:w-[450px] h-full bg-card rounded-none md:rounded-3xl p-4 md:p-6 gap-4 md:gap-6 shadow-[0px_4px_32px_rgba(0,0,0,0.12)] animate-in slide-in-from-right duration-300">
       {/* Title */}
       <div className="flex items-center gap-2.5">
         <h2 className="flex-1 text-xl font-semibold leading-7" style={{ color: "#111625" }}>

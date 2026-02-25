@@ -30,6 +30,11 @@ export async function GET(
   const messages = await prisma.message.findMany({
     where: { chatSessionId },
     orderBy: { createdAt: "asc" },
+    include: {
+      replyTo: {
+        include: { sender: { select: { name: true } } },
+      },
+    },
   });
 
   const apiMessages = messages.map((m) => ({
@@ -42,6 +47,16 @@ export async function GET(
     fileName: m.fileName,
     fileSize: m.fileSize,
     editedAt: m.editedAt?.toISOString() ?? null,
+    replyToId: m.replyToId,
+    replyTo: m.replyTo
+      ? {
+          id: m.replyTo.id,
+          content: m.replyTo.content,
+          senderId: m.replyTo.senderId,
+          senderName: m.replyTo.sender.name,
+          type: m.replyTo.type,
+        }
+      : null,
     createdAt: m.createdAt.toISOString(),
   }));
 

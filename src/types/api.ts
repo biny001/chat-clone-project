@@ -7,6 +7,14 @@ export interface ApiUser {
   image: string | null;
 }
 
+export interface ApiReplyTo {
+  id: string;
+  content: string;
+  senderId: string;
+  senderName: string;
+  type: string;
+}
+
 export interface ApiMessage {
   id: string;
   chatSessionId: string;
@@ -17,6 +25,8 @@ export interface ApiMessage {
   fileName?: string | null;
   fileSize?: number | null;
   editedAt?: string | null;
+  replyToId?: string | null;
+  replyTo?: ApiReplyTo | null;
   createdAt: string; // ISO date string
 }
 
@@ -40,6 +50,7 @@ export interface SendMessagePayload {
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
+  replyToId?: string;
 }
 
 export interface SendMessageResponse {
@@ -64,6 +75,8 @@ export interface AblyNewMessageEvent {
   fileUrl?: string | null;
   fileName?: string | null;
   fileSize?: number | null;
+  replyToId?: string | null;
+  replyTo?: ApiReplyTo | null;
   createdAt: string;
 }
 

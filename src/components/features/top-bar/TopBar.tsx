@@ -21,11 +21,11 @@ export const TopBar = ({ onProfileClick }: TopBarProps) => {
       </div>
 
       {/* Right: Search + icons + profile */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 h-8 w-[300px] rounded-[10px] border border-border px-2.5">
+      <div className="flex items-center gap-2 lg:gap-4">
+        <div className="hidden md:flex items-center gap-2 h-8 w-[200px] lg:w-[300px] rounded-[10px] border border-border px-2.5">
           <Search size={14} className="text-muted-foreground shrink-0" />
           <span className="flex-1 text-xs text-muted-foreground">Search</span>
-          <span className="flex items-center px-1.5 py-0.5 rounded-md bg-secondary text-xs text-foreground/80">⌘+K</span>
+          <span className="hidden lg:flex items-center px-1.5 py-0.5 rounded-md bg-secondary text-xs text-foreground/80">⌘+K</span>
         </div>
 
         <button className="flex items-center justify-center h-8 w-8 rounded-lg border border-border bg-card hover:bg-muted transition-colors">
@@ -42,7 +42,7 @@ export const TopBar = ({ onProfileClick }: TopBarProps) => {
             <AvatarImage src={user?.image ?? undefined} />
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground">{userInitials || "?"}</AvatarFallback>
           </Avatar>
-          <ChevronDown size={16} className="text-foreground" strokeWidth={1.5} />
+          <ChevronDown size={16} className="text-foreground hidden md:block" strokeWidth={1.5} />
         </button>
       </div>
     </div>

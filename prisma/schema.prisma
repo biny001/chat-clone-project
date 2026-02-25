@@ -95,8 +95,11 @@ model Message {
   fileName      String?
   fileSize      Int?
   editedAt      DateTime?
+  replyToId     String?
   createdAt     DateTime  @default(now())
 
   chatSession ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
   sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyTo     Message?    @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies     Message[]   @relation("MessageReplies")
 }

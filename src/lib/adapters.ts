@@ -68,6 +68,10 @@ export function toMessage(
     fileName: api.fileName ?? undefined,
     fileSize: api.fileSize ?? undefined,
     editedAt: api.editedAt ?? undefined,
+    replyToId: api.replyToId ?? undefined,
+    replyToText: api.replyTo?.content ?? undefined,
+    replyToSender: api.replyTo?.senderName ?? undefined,
+    replyToType: (api.replyTo?.type as "text" | "image" | "video" | "file" | "audio") ?? undefined,
   };
 }
 

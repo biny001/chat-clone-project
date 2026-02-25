@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { chatSessionId, content, type, fileUrl, fileName, fileSize } = await request.json();
+  const { chatSessionId, content, type, fileUrl, fileName, fileSize, replyToId } = await request.json();
   const senderId = session.user.id;
 
   // For text messages, content is required. For file/image, fileUrl is required.
@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
   // Persist message, update ChatSession timestamp, and mark sender's read cursor
   const now = new Date();
   const isUser1 = chatSession.user1Id === senderId;
-  const [message] = await prisma.$transaction([
-    prisma.message.create({
+  const message = await prisma.$transaction(async (tx) => {
+    const msg = await tx.message.create({
       data: {
         chatSessionId,
         senderId,
@@ -51,17 +51,23 @@ export async function POST(request: NextRequest) {
         fileUrl: fileUrl || null,
         fileName: fileName || null,
         fileSize: fileSize || null,
+        replyToId: replyToId || null,
       },
-    }),
-    prisma.chatSession.update({
+      include: {
+        replyTo: {
+          include: { sender: { select: { name: true } } },
+        },
+      },
+    });
+    await tx.chatSession.update({
       where: { id: chatSessionId },
       data: {
         updatedAt: now,
-        // Always advance the sender's read cursor so they never see their own messages as unread
         ...(isUser1 ? { user1LastReadAt: now } : { user2LastReadAt: now }),
       },
-    }),
-  ]);
+    });
+    return msg;
+  });
 
   // Publish to Ably
   const ably = new Ably.Rest({ key: process.env.ABLY_API_KEY! });
@@ -75,6 +81,16 @@ export async function POST(request: NextRequest) {
     fileUrl: message.fileUrl,
     fileName: message.fileName,
     fileSize: message.fileSize,
+    replyToId: message.replyToId,
+    replyTo: message.replyTo
+      ? {
+          id: message.replyTo.id,
+          content: message.replyTo.content,
+          senderId: message.replyTo.senderId,
+          senderName: message.replyTo.sender.name,
+          type: message.replyTo.type,
+        }
+      : null,
     createdAt: message.createdAt.toISOString(),
   };
 
@@ -113,6 +129,16 @@ export async function POST(request: NextRequest) {
       fileName: message.fileName,
       fileSize: message.fileSize,
       editedAt: null,
+      replyToId: message.replyToId,
+      replyTo: message.replyTo
+        ? {
+            id: message.replyTo.id,
+            content: message.replyTo.content,
+            senderId: message.replyTo.senderId,
+            senderName: message.replyTo.sender.name,
+            type: message.replyTo.type,
+          }
+        : null,
       createdAt: message.createdAt.toISOString(),
     },
   });

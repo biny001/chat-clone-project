@@ -26,6 +26,10 @@ export interface Message {
   editedAt?: string;
   /** 0-100 while uploading, undefined when done */
   uploadProgress?: number;
+  replyToId?: string;
+  replyToText?: string;
+  replyToSender?: string;
+  replyToType?: "text" | "image" | "video" | "file" | "audio";
 }
 
 export interface Contact {

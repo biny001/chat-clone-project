@@ -58,6 +58,7 @@ export function useSendMessage() {
         fileName: variables.fileName || null,
         fileSize: variables.fileSize || null,
         editedAt: null,
+        replyToId: variables.replyToId || null,
         createdAt: new Date().toISOString(),
       };
 
