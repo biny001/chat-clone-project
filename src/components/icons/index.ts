@@ -1,0 +1,10 @@
+export { HomeIcon } from "./HomeIcon";
+export { ChatCircleIcon } from "./ChatCircleIcon";
+export { CompassIcon } from "./CompassIcon";
+export { FolderIcon } from "./FolderIcon";
+export { ImagesIcon } from "./ImagesIcon";
+export { StarFourIcon } from "./StarFourIcon";
+export { LogoIcon } from "./LogoIcon";
+export { MessageIcon } from "./MessageIcon";
+export { ChecksIcon } from "./ChecksIcon";
+export { FileIcon } from "./FileIcon";
