@@ -70,11 +70,13 @@ model Verification {
 // ─── App domain tables (for later chat phase) ───
 
 model ChatSession {
-  id        String   @id @default(cuid())
-  user1Id   String
-  user2Id   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(cuid())
+  user1Id         String
+  user2Id         String
+  user1LastReadAt DateTime?
+  user2LastReadAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user1    User      @relation("User1Sessions", fields: [user1Id], references: [id], onDelete: Cascade)
   user2    User      @relation("User2Sessions", fields: [user2Id], references: [id], onDelete: Cascade)
@@ -84,11 +86,16 @@ model ChatSession {
 }
 
 model Message {
-  id            String      @id @default(cuid())
+  id            String    @id @default(cuid())
   chatSessionId String
   senderId      String
   content       String
-  createdAt     DateTime    @default(now())
+  type          String    @default("text")
+  fileUrl       String?
+  fileName      String?
+  fileSize      Int?
+  editedAt      DateTime?
+  createdAt     DateTime  @default(now())
 
   chatSession ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
   sender      User        @relation(fields: [senderId], references: [id], onDelete: Cascade)

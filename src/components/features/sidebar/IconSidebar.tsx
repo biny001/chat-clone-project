@@ -16,7 +16,11 @@ const navItems = [
   { icon: ImagesIcon, label: "Media" },
 ];
 
-export const IconSidebar = () => {
+interface IconSidebarProps {
+  onProfileClick?: () => void;
+}
+
+export const IconSidebar = ({ onProfileClick }: IconSidebarProps) => {
   const [activeNav, setActiveNav] = useState("Messages");
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, userInitials } = useAuth();
@@ -61,10 +65,12 @@ export const IconSidebar = () => {
           </TooltipTrigger>
           <TooltipContent side="right">AI</TooltipContent>
         </Tooltip>
-        <Avatar className="h-11 w-11 cursor-pointer">
-          <AvatarImage src={user?.image || undefined} />
-          <AvatarFallback className="bg-muted text-xs font-medium">{userInitials || "?"}</AvatarFallback>
-        </Avatar>
+        <button onClick={onProfileClick}>
+          <Avatar className="h-11 w-11 cursor-pointer">
+            <AvatarImage src={user?.image ?? undefined} />
+            <AvatarFallback className="bg-muted text-xs font-medium">{userInitials || "?"}</AvatarFallback>
+          </Avatar>
+        </button>
       </div>
 
       <LogoMenu open={menuOpen} onClose={() => setMenuOpen(false)} />

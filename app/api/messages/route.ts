@@ -11,11 +11,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { chatSessionId, content } = await request.json();
+  const { chatSessionId, content, type, fileUrl, fileName, fileSize } = await request.json();
   const senderId = session.user.id;
 
-  if (!chatSessionId || !content?.trim()) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  // For text messages, content is required. For file/image, fileUrl is required.
+  const msgType = type || "text";
+  if (!chatSessionId) {
+    return NextResponse.json({ error: "Missing chatSessionId" }, { status: 400 });
+  }
+  if (msgType === "text" && !content?.trim()) {
+    return NextResponse.json({ error: "Missing content" }, { status: 400 });
+  }
+  if ((msgType === "image" || msgType === "file") && !fileUrl) {
+    return NextResponse.json({ error: "Missing fileUrl" }, { status: 400 });
   }
 
   // Verify user is a participant
@@ -33,7 +41,15 @@ export async function POST(request: NextRequest) {
   // Persist message and update ChatSession timestamp
   const [message] = await prisma.$transaction([
     prisma.message.create({
-      data: { chatSessionId, senderId, content: content.trim() },
+      data: {
+        chatSessionId,
+        senderId,
+        content: content?.trim() || "",
+        type: msgType,
+        fileUrl: fileUrl || null,
+        fileName: fileName || null,
+        fileSize: fileSize || null,
+      },
     }),
     prisma.chatSession.update({
       where: { id: chatSessionId },
@@ -49,13 +65,20 @@ export async function POST(request: NextRequest) {
     chatSessionId: message.chatSessionId,
     senderId: message.senderId,
     content: message.content,
+    type: message.type,
+    fileUrl: message.fileUrl,
+    fileName: message.fileName,
+    fileSize: message.fileSize,
     createdAt: message.createdAt.toISOString(),
   };
+
+  const displayContent =
+    msgType === "image" ? "Sent an image" : msgType === "file" ? `Sent a file: ${fileName || "file"}` : message.content;
 
   const conversationUpdateEvent: AblyConversationUpdateEvent = {
     chatSessionId: message.chatSessionId,
     lastMessage: {
-      content: message.content,
+      content: displayContent,
       createdAt: message.createdAt.toISOString(),
       senderId: message.senderId,
     },
@@ -79,6 +102,11 @@ export async function POST(request: NextRequest) {
       chatSessionId: message.chatSessionId,
       senderId: message.senderId,
       content: message.content,
+      type: message.type,
+      fileUrl: message.fileUrl,
+      fileName: message.fileName,
+      fileSize: message.fileSize,
+      editedAt: null,
       createdAt: message.createdAt.toISOString(),
     },
   });

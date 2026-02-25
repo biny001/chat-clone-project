@@ -37,6 +37,11 @@ export async function GET(
     chatSessionId: m.chatSessionId,
     senderId: m.senderId,
     content: m.content,
+    type: m.type,
+    fileUrl: m.fileUrl,
+    fileName: m.fileName,
+    fileSize: m.fileSize,
+    editedAt: m.editedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
   }));
 

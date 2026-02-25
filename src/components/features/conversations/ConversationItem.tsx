@@ -39,16 +39,25 @@ export const ConversationItem = ({ conversation, isActive, onSelect }: Conversat
           )}
           style={{ height: 64 }}
         >
-          <Avatar className="h-10 w-10 shrink-0">
-            <AvatarFallback
+          <div className="relative shrink-0">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback
+                className={cn(
+                  "text-[11px] font-semibold text-white",
+                  avatarColors[conversation.avatar] || "bg-primary"
+                )}
+              >
+                {conversation.avatar}
+              </AvatarFallback>
+            </Avatar>
+            {/* Online status dot */}
+            <span
               className={cn(
-                "text-[11px] font-semibold text-white",
-                avatarColors[conversation.avatar] || "bg-primary"
+                "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card",
+                conversation.online ? "bg-green-500" : "bg-gray-400"
               )}
-            >
-              {conversation.avatar}
-            </AvatarFallback>
-          </Avatar>
+            />
+          </div>
 
           <div className="min-w-0 flex-1 flex flex-col gap-1">
             <div className="flex items-center justify-between">

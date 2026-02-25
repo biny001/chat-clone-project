@@ -5,7 +5,7 @@ import { useAbly } from "ably/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./use-auth";
 import type { ApiMessage } from "@/types/api";
-import type { AblyNewMessageEvent } from "@/types/api";
+import type { AblyNewMessageEvent, AblyMessageEditedEvent } from "@/types/api";
 import type { InboundMessage } from "ably";
 
 export function useRealtimeMessages(chatSessionId: string | null) {
@@ -29,18 +29,42 @@ export function useRealtimeMessages(chatSessionId: string | null) {
       queryClient.setQueryData<ApiMessage[]>(
         ["messages", chatSessionId],
         (old) => {
-          if (!old) return [event];
+          if (!old) return [event as ApiMessage];
           // Avoid duplicates
           if (old.some((m) => m.id === event.id)) return old;
-          return [...old, event];
+          return [...old, event as ApiMessage];
         }
       );
     };
 
+    const onMessageEdited = (message: InboundMessage) => {
+      const event = message.data as AblyMessageEditedEvent;
+
+      queryClient.setQueryData<ApiMessage[]>(
+        ["messages", chatSessionId],
+        (old) => {
+          if (!old) return old;
+          return old.map((m) =>
+            m.id === event.id
+              ? { ...m, content: event.content, editedAt: event.editedAt }
+              : m
+          );
+        }
+      );
+    };
+
+    const onMessageRead = () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    };
+
     channel.subscribe("new-message", onNewMessage);
+    channel.subscribe("message-edited", onMessageEdited);
+    channel.subscribe("message-read", onMessageRead);
 
     return () => {
       channel.unsubscribe("new-message", onNewMessage);
+      channel.unsubscribe("message-edited", onMessageEdited);
+      channel.unsubscribe("message-read", onMessageRead);
     };
   }, [ably, chatSessionId, currentUserId, queryClient]);
 }

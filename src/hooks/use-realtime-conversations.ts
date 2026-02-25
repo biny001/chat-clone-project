@@ -21,9 +21,11 @@ export function useRealtimeConversations() {
     };
 
     channel.subscribe("conversation-update", onUpdate);
+    channel.subscribe("message-read", onUpdate);
 
     return () => {
       channel.unsubscribe("conversation-update", onUpdate);
+      channel.unsubscribe("message-read", onUpdate);
     };
   }, [ably, userId, queryClient]);
 }

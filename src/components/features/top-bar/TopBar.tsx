@@ -1,12 +1,16 @@
 "use client";
 
 import { Search, Bell, Settings, ChevronDown } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageIcon } from "@/components/icons";
 import { useAuth } from "@/hooks/use-auth";
 
-export const TopBar = () => {
-  const { userInitials } = useAuth();
+interface TopBarProps {
+  onProfileClick?: () => void;
+}
+
+export const TopBar = ({ onProfileClick }: TopBarProps) => {
+  const { user, userInitials } = useAuth();
 
   return (
     <div className="flex items-center justify-between px-6 py-3 bg-card rounded-2xl">
@@ -33,12 +37,13 @@ export const TopBar = () => {
 
         <div className="w-px h-5 bg-border" />
 
-        <div className="flex items-center gap-2 cursor-pointer">
+        <button onClick={onProfileClick} className="flex items-center gap-2 cursor-pointer">
           <Avatar className="h-8 w-8">
+            <AvatarImage src={user?.image ?? undefined} />
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground">{userInitials || "?"}</AvatarFallback>
           </Avatar>
           <ChevronDown size={16} className="text-foreground" strokeWidth={1.5} />
-        </div>
+        </button>
       </div>
     </div>
   );

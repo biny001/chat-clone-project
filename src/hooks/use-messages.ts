@@ -44,3 +44,22 @@ export function useSendMessage() {
     },
   });
 }
+
+export function useEditMessage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, content }: { id: string; content: string; chatSessionId: string }) => {
+      const res = await fetch(`/api/messages/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      if (!res.ok) throw new Error("Failed to edit message");
+      return res.json();
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.chatSessionId] });
+    },
+  });
+}

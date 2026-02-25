@@ -19,6 +19,11 @@ export interface Message {
   read?: boolean;
   reaction?: string;
   isFollowUp?: boolean;
+  type?: "text" | "image" | "file";
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  editedAt?: string;
 }
 
 export interface Contact {

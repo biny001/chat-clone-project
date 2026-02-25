@@ -16,7 +16,9 @@
       "WebFetch(domain:faqs.ably.com)",
       "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm i ably 2>&1)",
       "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm approve-builds prisma @prisma/engines 2>&1)",
-      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm run build 2>&1)"
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && pnpm run build 2>&1)",
+      "WebFetch(domain:docs.uploadthing.com)",
+      "Bash(cd /c/Users/hp/Documents/chatly/chat-clone-project && npx prisma migrate dev --name phase3-rich-messages 2>&1)"
     ]
   }
 }

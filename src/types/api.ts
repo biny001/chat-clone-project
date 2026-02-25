@@ -12,6 +12,11 @@ export interface ApiMessage {
   chatSessionId: string;
   senderId: string;
   content: string;
+  type: string;
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+  editedAt?: string | null;
   createdAt: string; // ISO date string
 }
 
@@ -23,12 +28,17 @@ export interface ApiConversation {
   updatedAt: string;
   otherUser: ApiUser;
   lastMessage: ApiMessage | null;
+  unreadCount: number;
 }
 
 // Request payloads
 export interface SendMessagePayload {
   chatSessionId: string;
   content: string;
+  type?: "text" | "image" | "file";
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
 }
 
 export interface SendMessageResponse {
@@ -49,6 +59,10 @@ export interface AblyNewMessageEvent {
   chatSessionId: string;
   senderId: string;
   content: string;
+  type: string;
+  fileUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
   createdAt: string;
 }
 
@@ -59,4 +73,17 @@ export interface AblyConversationUpdateEvent {
     createdAt: string;
     senderId: string;
   };
+}
+
+export interface AblyMessageEditedEvent {
+  id: string;
+  chatSessionId: string;
+  content: string;
+  editedAt: string;
+}
+
+export interface AblyMessageReadEvent {
+  chatSessionId: string;
+  userId: string;
+  readAt: string;
 }

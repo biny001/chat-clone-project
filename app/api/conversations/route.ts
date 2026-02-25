@@ -26,6 +26,26 @@ export async function GET() {
     orderBy: { updatedAt: "desc" },
   });
 
+  // Compute unread counts
+  const unreadCounts = await Promise.all(
+    chatSessions.map(async (cs) => {
+      const isUser1 = cs.user1Id === userId;
+      const lastReadAt = isUser1 ? cs.user1LastReadAt : cs.user2LastReadAt;
+
+      const count = await prisma.message.count({
+        where: {
+          chatSessionId: cs.id,
+          senderId: { not: userId },
+          ...(lastReadAt ? { createdAt: { gt: lastReadAt } } : {}),
+        },
+      });
+
+      return { id: cs.id, count };
+    })
+  );
+
+  const unreadMap = new Map(unreadCounts.map((u) => [u.id, u.count]));
+
   const conversations = chatSessions.map((cs) => {
     const otherUser = cs.user1Id === userId ? cs.user2 : cs.user1;
     const lastMessage = cs.messages[0] ?? null;
@@ -42,9 +62,15 @@ export async function GET() {
             chatSessionId: lastMessage.chatSessionId,
             senderId: lastMessage.senderId,
             content: lastMessage.content,
+            type: lastMessage.type,
+            fileUrl: lastMessage.fileUrl,
+            fileName: lastMessage.fileName,
+            fileSize: lastMessage.fileSize,
+            editedAt: lastMessage.editedAt?.toISOString() ?? null,
             createdAt: lastMessage.createdAt.toISOString(),
           }
         : null,
+      unreadCount: unreadMap.get(cs.id) ?? 0,
     };
   });
 
@@ -105,9 +131,15 @@ export async function POST(request: NextRequest) {
             chatSessionId: lastMessage.chatSessionId,
             senderId: lastMessage.senderId,
             content: lastMessage.content,
+            type: lastMessage.type,
+            fileUrl: lastMessage.fileUrl,
+            fileName: lastMessage.fileName,
+            fileSize: lastMessage.fileSize,
+            editedAt: lastMessage.editedAt?.toISOString() ?? null,
             createdAt: lastMessage.createdAt.toISOString(),
           }
         : null,
+      unreadCount: 0,
     },
   });
 }
