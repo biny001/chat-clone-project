@@ -3,13 +3,13 @@
 import { useState, useRef, useCallback, useEffect, type FormEvent, type ClipboardEvent } from "react";
 import { Mic, Smile, Paperclip, Send, Square, Trash2, Loader2, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUploadThing } from "@/lib/uploadthing";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 
 export interface StagedFile {
   file: File;
   preview: string;
   isImage: boolean;
+  isVideo: boolean;
 }
 
 interface ChatInputProps {
@@ -19,17 +19,18 @@ interface ChatInputProps {
   onStageFiles?: (files: StagedFile[]) => void;
   stagedFiles?: StagedFile[];
   onClearStaged?: () => void;
+  /** Upload files with in-chat progress (bypasses preview overlay) */
+  onDirectFileUpload?: (files: File[]) => void;
 }
 
 export const ChatInput = ({
   onSend,
-  onSendFile,
   onTyping,
   onStageFiles,
   stagedFiles = [],
+  onDirectFileUpload,
 }: ChatInputProps) => {
   const [inputValue, setInputValue] = useState("");
-  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addMoreRef = useRef<HTMLInputElement>(null);
 
@@ -44,31 +45,6 @@ export const ChatInput = ({
 
   const { isRecording, recordingDuration, startRecording, stopRecording, cancelRecording } =
     useAudioRecorder();
-
-  const { startUpload } = useUploadThing("chatAttachment", {
-    onClientUploadComplete: (res) => {
-      setIsUploadingAudio(false);
-      if (res && res.length > 0) {
-        for (const file of res) {
-          const isImage =
-            file.type?.startsWith("image/") ||
-            /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
-          const isAudio =
-            file.type?.startsWith("audio/") ||
-            /\.(webm|mp3|ogg|wav|m4a)$/i.test(file.name);
-          onSendFile?.({
-            type: isAudio ? "audio" : isImage ? "image" : "file",
-            fileUrl: file.ufsUrl,
-            fileName: file.name,
-            fileSize: file.size,
-          });
-        }
-      }
-    },
-    onUploadError: () => {
-      setIsUploadingAudio(false);
-    },
-  });
 
   // Cleanup audio preview on unmount or when cleared
   useEffect(() => {
@@ -132,21 +108,27 @@ export const ChatInput = ({
   const stageFiles = useCallback(
     (fileList: FileList | File[]) => {
       const files = Array.from(fileList);
-      const newStaged: StagedFile[] = files.map((file) => ({
-        file,
-        preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-        isImage: file.type.startsWith("image/"),
-      }));
+      const newStaged: StagedFile[] = files.map((file) => {
+        const isImage = file.type.startsWith("image/");
+        const isVideo = file.type.startsWith("video/");
+        return {
+          file,
+          preview: (isImage || isVideo) ? URL.createObjectURL(file) : "",
+          isImage,
+          isVideo,
+        };
+      });
 
-      const hasImages = newStaged.some((f) => f.isImage);
-      if (!hasImages) {
-        startUpload(files);
+      const hasVisual = newStaged.some((f) => f.isImage || f.isVideo);
+      if (!hasVisual) {
+        // Non-visual files: upload with in-chat progress
+        onDirectFileUpload?.(files);
         return;
       }
 
       onStageFiles?.([...stagedFiles, ...newStaged]);
     },
-    [onStageFiles, stagedFiles, startUpload]
+    [onStageFiles, stagedFiles, onDirectFileUpload]
   );
 
   const handleFileSelect = useCallback(() => {
@@ -216,13 +198,12 @@ export const ChatInput = ({
     }
   };
 
-  // Audio preview: confirm send → upload → send
+  // Audio preview: confirm send → upload with in-chat progress
   const handleSendAudio = async () => {
     if (!audioBlob) return;
     clearAudioPreview();
-    setIsUploadingAudio(true);
     const file = new File([audioBlob], `voice-${Date.now()}.webm`, { type: "audio/webm" });
-    await startUpload([file]);
+    onDirectFileUpload?.([file]);
   };
 
   const formatDuration = (seconds: number) => {
@@ -344,21 +325,6 @@ export const ChatInput = ({
           >
             <Send size={14} className="text-primary-foreground" />
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  // === Uploading audio spinner ===
-  if (isUploadingAudio) {
-    return (
-      <div className="pt-3">
-        {fileInputs}
-        <div className="flex items-center rounded-full border border-border pl-4 pr-1 py-1 gap-3 h-10">
-          <div className="flex items-center gap-2 flex-1">
-            <Loader2 size={14} className="animate-spin text-primary" />
-            <span className="text-xs text-muted-foreground">Sending voice message...</span>
-          </div>
         </div>
       </div>
     );

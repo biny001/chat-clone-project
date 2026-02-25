@@ -60,11 +60,11 @@ const ChatPage = () => {
     sendMessage.mutate({ chatSessionId: activeConversationId, content: text });
   }, [activeConversationId, sendMessage]);
 
-  const handleSendFile = useCallback((data: { type: "image" | "file" | "audio"; fileUrl: string; fileName: string; fileSize: number }) => {
+  const handleSendFile = useCallback((data: { type: "image" | "video" | "file" | "audio"; fileUrl: string; fileName: string; fileSize: number }) => {
     if (!activeConversationId) return;
     sendMessage.mutate({
       chatSessionId: activeConversationId,
-      content: data.type === "image" ? "" : data.type === "audio" ? "" : data.fileName,
+      content: data.type === "image" || data.type === "video" ? "" : data.type === "audio" ? "" : data.fileName,
       type: data.type,
       fileUrl: data.fileUrl,
       fileName: data.fileName,

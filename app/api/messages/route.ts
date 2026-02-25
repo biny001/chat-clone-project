@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if (msgType === "text" && !content?.trim()) {
     return NextResponse.json({ error: "Missing content" }, { status: 400 });
   }
-  if ((msgType === "image" || msgType === "file" || msgType === "audio") && !fileUrl) {
+  if ((msgType === "image" || msgType === "video" || msgType === "file" || msgType === "audio") && !fileUrl) {
     return NextResponse.json({ error: "Missing fileUrl" }, { status: 400 });
   }
 
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
   };
 
   const displayContent =
-    msgType === "image" ? "Sent an image" : msgType === "audio" ? "Sent a voice message" : msgType === "file" ? `Sent a file: ${fileName || "file"}` : message.content;
+    msgType === "image" ? "Sent an image" : msgType === "video" ? "Sent a video" : msgType === "audio" ? "Sent a voice message" : msgType === "file" ? `Sent a file: ${fileName || "file"}` : message.content;
 
   const conversationUpdateEvent: AblyConversationUpdateEvent = {
     chatSessionId: message.chatSessionId,

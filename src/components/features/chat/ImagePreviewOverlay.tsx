@@ -8,6 +8,7 @@ interface StagedFile {
   file: File;
   preview: string;
   isImage: boolean;
+  isVideo: boolean;
 }
 
 interface ImagePreviewOverlayProps {
@@ -43,6 +44,8 @@ export const ImagePreviewOverlay = ({
 
   if (files.length === 0) return null;
 
+  const isVisual = activeFile?.isImage || activeFile?.isVideo;
+
   return (
     <div className="absolute inset-0 z-20 flex flex-col bg-secondary rounded-2xl overflow-hidden">
       {/* Header */}
@@ -62,7 +65,17 @@ export const ImagePreviewOverlay = ({
 
       {/* Main preview area */}
       <div className="flex-1 flex items-center justify-center px-8 py-4 min-h-0">
-        {activeFile?.isImage ? (
+        {activeFile?.isVideo ? (
+          <video
+            key={activeFile.preview}
+            src={activeFile.preview}
+            className="max-w-full max-h-full object-contain rounded-lg"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : activeFile?.isImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={activeFile.preview}
@@ -98,7 +111,15 @@ export const ImagePreviewOverlay = ({
                 i === activeIndex ? "border-primary" : "border-transparent opacity-60 hover:opacity-100"
               )}
             >
-              {f.isImage ? (
+              {f.isVideo ? (
+                <video
+                  src={f.preview}
+                  className="w-full h-full object-cover"
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
+              ) : f.isImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={f.preview} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -132,7 +153,7 @@ export const ImagePreviewOverlay = ({
       <div className="flex items-center gap-2 px-4 py-3">
         <input
           type="text"
-          placeholder="Add a caption..."
+          placeholder={isVisual ? "Add a caption..." : ""}
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
           onKeyDown={(e) => {

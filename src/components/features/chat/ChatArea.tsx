@@ -11,11 +11,37 @@ import { useChatSearch } from "@/hooks/use-chat-search";
 import { useUploadThing } from "@/lib/uploadthing";
 import type { Conversation, Message } from "@/types/chat";
 
+type MediaType = "image" | "video" | "file" | "audio";
+
+interface UploadingMessage {
+  id: string;
+  type: MediaType;
+  localUrl: string;
+  fileName: string;
+  fileSize: number;
+  progress: number;
+}
+
+function detectFileType(file: File): MediaType {
+  if (file.type.startsWith("image/")) return "image";
+  // audio/ must be checked before video/ because audio/webm starts with audio/
+  if (file.type.startsWith("audio/")) return "audio";
+  if (file.type.startsWith("video/")) return "video";
+  // Fallback by extension
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  if (["mp3", "ogg", "wav", "m4a", "flac"].includes(ext)) return "audio";
+  if (["mp4", "mov", "avi", "mkv", "m4v"].includes(ext)) return "video";
+  // webm can be audio or video — voice recordings use "voice-" prefix
+  if (ext === "webm") return file.name.startsWith("voice-") ? "audio" : "video";
+  if (["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"].includes(ext)) return "image";
+  return "file";
+}
+
 interface ChatAreaProps {
   conversation: Conversation | null;
   messages: Message[];
   onSendMessage: (text: string) => void;
-  onSendFile?: (data: { type: "image" | "file" | "audio"; fileUrl: string; fileName: string; fileSize: number }) => void;
+  onSendFile?: (data: { type: MediaType; fileUrl: string; fileName: string; fileSize: number }) => void;
   onEditMessage?: (id: string, content: string) => void;
   onOpenContactInfo?: () => void;
   isOtherUserTyping?: boolean;
@@ -37,40 +63,81 @@ export const ChatArea = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
-  const [isUploadingStagedFiles, setIsUploadingStagedFiles] = useState(false);
+  const [uploadingMessages, setUploadingMessages] = useState<UploadingMessage[]>([]);
+
+  // Ref to store pending file metadata for correlating with upload results
+  const pendingFilesRef = useRef<{ id: string; file: File; type: MediaType; localUrl: string }[]>([]);
 
   const { results: displayMessages, matchCount } = useChatSearch(chatMessages, searchQuery);
 
-  const { startUpload } = useUploadThing("chatAttachment", {
+  const { startUpload, isUploading: isUploadThingActive } = useUploadThing("chatAttachment", {
+    onUploadProgress: (progress) => {
+      // UploadThing gives a single aggregate progress — apply to all pending
+      setUploadingMessages((prev) =>
+        prev.map((m) => ({ ...m, progress }))
+      );
+    },
     onClientUploadComplete: (res) => {
-      setIsUploadingStagedFiles(false);
       if (res && res.length > 0) {
         for (const file of res) {
-          const isImage =
-            file.type?.startsWith("image/") ||
-            /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
+          // Match type from our pending files ref (most reliable)
+          const pending = pendingFilesRef.current.find((p) => p.file.name === file.name);
+          let type: MediaType = pending?.type ?? "file";
+          if (!pending) {
+            // Fallback detection — check audio before video (webm ambiguity)
+            if (file.type?.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name)) {
+              type = "image";
+            } else if (file.type?.startsWith("audio/") || /\.(mp3|ogg|wav|m4a|flac)$/i.test(file.name) || /^voice-.*\.webm$/i.test(file.name)) {
+              type = "audio";
+            } else if (file.type?.startsWith("video/") || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name)) {
+              type = "video";
+            }
+          }
           onSendFile?.({
-            type: isImage ? "image" : "file",
+            type,
             fileUrl: file.ufsUrl,
             fileName: file.name,
             fileSize: file.size,
           });
         }
       }
-      // Clean up previews
-      for (const f of stagedFiles) {
-        if (f.preview) URL.revokeObjectURL(f.preview);
+      // Clean up uploading messages and revoke blob URLs
+      for (const um of pendingFilesRef.current) {
+        URL.revokeObjectURL(um.localUrl);
       }
-      setStagedFiles([]);
+      pendingFilesRef.current = [];
+      setUploadingMessages([]);
     },
     onUploadError: () => {
-      setIsUploadingStagedFiles(false);
+      // Clean up on error
+      for (const um of pendingFilesRef.current) {
+        URL.revokeObjectURL(um.localUrl);
+      }
+      pendingFilesRef.current = [];
+      setUploadingMessages([]);
     },
   });
 
+  // Merge uploading messages into display list
+  const mergedMessages: Message[] = [
+    ...displayMessages,
+    ...uploadingMessages.map((um): Message => ({
+      id: um.id,
+      conversationId: conversation?.id || "",
+      text: um.type === "image" || um.type === "video" ? "" : um.type === "audio" ? "" : um.fileName,
+      timestamp: "Sending...",
+      sent: true,
+      type: um.type,
+      fileUrl: um.localUrl,
+      fileName: um.fileName,
+      fileSize: um.fileSize,
+      uploadProgress: um.progress,
+    })),
+  ];
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages.length, isOtherUserTyping]);
+  }, [chatMessages.length, uploadingMessages.length, isOtherUserTyping]);
 
   // Reset search + staged files when conversation changes
   useEffect(() => {
@@ -101,7 +168,31 @@ export const ChatArea = ({
         onSendMessage(caption.trim());
       }
 
-      setIsUploadingStagedFiles(true);
+      // Create uploading messages with local blob URLs for instant preview
+      const pending: typeof pendingFilesRef.current = [];
+      const newUploadingMsgs: UploadingMessage[] = [];
+
+      for (const staged of stagedFiles) {
+        const type = detectFileType(staged.file);
+        const localUrl = staged.preview || URL.createObjectURL(staged.file);
+        const id = `uploading-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        pending.push({ id, file: staged.file, type, localUrl });
+        newUploadingMsgs.push({
+          id,
+          type,
+          localUrl,
+          fileName: staged.file.name,
+          fileSize: staged.file.size,
+          progress: 0,
+        });
+      }
+
+      pendingFilesRef.current = pending;
+      setUploadingMessages(newUploadingMsgs);
+      setStagedFiles([]);
+
+      // Start the actual upload
       const files = stagedFiles.map((s) => s.file);
       await startUpload(files);
     },
@@ -123,15 +214,69 @@ export const ChatArea = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || files.length === 0) return;
-      const newStaged: StagedFile[] = Array.from(files).map((file) => ({
-        file,
-        preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-        isImage: file.type.startsWith("image/"),
-      }));
+      const newStaged: StagedFile[] = Array.from(files).map((file) => {
+        const isImage = file.type.startsWith("image/");
+        const isVideo = file.type.startsWith("video/");
+        return {
+          file,
+          preview: (isImage || isVideo) ? URL.createObjectURL(file) : "",
+          isImage,
+          isVideo,
+        };
+      });
       setStagedFiles((prev) => [...prev, ...newStaged]);
       if (addMoreRef.current) addMoreRef.current.value = "";
     },
     []
+  );
+
+  // Handle cancel of an in-progress upload
+  const handleCancelUpload = useCallback((id: string) => {
+    // Remove the specific uploading message from UI
+    setUploadingMessages((prev) => prev.filter((m) => m.id !== id));
+    const pending = pendingFilesRef.current.find((p) => p.id === id);
+    if (pending) {
+      URL.revokeObjectURL(pending.localUrl);
+      pendingFilesRef.current = pendingFilesRef.current.filter((p) => p.id !== id);
+    }
+  }, []);
+
+  // Handle file uploads from ChatInput (non-image files that skip the preview overlay)
+  const handleSendFileFromInput = useCallback(
+    (data: { type: MediaType; fileUrl: string; fileName: string; fileSize: number }) => {
+      onSendFile?.(data);
+    },
+    [onSendFile]
+  );
+
+  // Handle non-image file upload with progress (from ChatInput paperclip)
+  const handleDirectFileUpload = useCallback(
+    async (files: File[]) => {
+      const pending: typeof pendingFilesRef.current = [];
+      const newUploadingMsgs: UploadingMessage[] = [];
+
+      for (const file of files) {
+        const type = detectFileType(file);
+        const localUrl = URL.createObjectURL(file);
+        const id = `uploading-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        pending.push({ id, file, type, localUrl });
+        newUploadingMsgs.push({
+          id,
+          type,
+          localUrl,
+          fileName: file.name,
+          fileSize: file.size,
+          progress: 0,
+        });
+      }
+
+      pendingFilesRef.current = [...pendingFilesRef.current, ...pending];
+      setUploadingMessages((prev) => [...prev, ...newUploadingMsgs]);
+
+      await startUpload(files);
+    },
+    [startUpload]
   );
 
   if (!conversation) {
@@ -142,7 +287,7 @@ export const ChatArea = ({
     );
   }
 
-  const groupedMessages = groupMessages(displayMessages);
+  const groupedMessages = groupMessages(mergedMessages);
   const hasStaged = stagedFiles.length > 0;
 
   return (
@@ -181,7 +326,7 @@ export const ChatArea = ({
               onAddMore={handleAddMore}
               onSend={handleSendStaged}
               onCancel={handleCancelStaged}
-              isUploading={isUploadingStagedFiles}
+              isUploading={isUploadThingActive}
             />
           )}
 
@@ -203,6 +348,7 @@ export const ChatArea = ({
                   sent={group.sent}
                   messages={group.messages}
                   onEditMessage={onEditMessage}
+                  onCancelUpload={handleCancelUpload}
                 />
               ))}
               {isOtherUserTyping && <TypingBubble />}
@@ -213,11 +359,12 @@ export const ChatArea = ({
 
         <ChatInput
           onSend={onSendMessage}
-          onSendFile={onSendFile}
+          onSendFile={handleSendFileFromInput}
           onTyping={onTyping}
           onStageFiles={handleStageFiles}
           stagedFiles={stagedFiles}
           onClearStaged={handleCancelStaged}
+          onDirectFileUpload={handleDirectFileUpload}
         />
       </div>
     </div>

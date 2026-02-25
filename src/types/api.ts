@@ -36,7 +36,7 @@ export interface ApiConversation {
 export interface SendMessagePayload {
   chatSessionId: string;
   content: string;
-  type?: "text" | "image" | "file" | "audio";
+  type?: "text" | "image" | "video" | "file" | "audio";
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;

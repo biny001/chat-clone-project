@@ -63,7 +63,7 @@ export function toMessage(
     timestamp: formatMessageTimestamp(api.createdAt),
     sent: isSent,
     read: isRead,
-    type: (api.type as "text" | "image" | "file" | "audio") || "text",
+    type: (api.type as "text" | "image" | "video" | "file" | "audio") || "text",
     fileUrl: api.fileUrl ?? undefined,
     fileName: api.fileName ?? undefined,
     fileSize: api.fileSize ?? undefined,
