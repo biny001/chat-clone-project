@@ -4,6 +4,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
 interface ContactInfoPanelProps {
   name: string;
   avatar: string;
@@ -98,14 +106,14 @@ const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProp
 
       {/* Tabs */}
       <div className="flex flex-col gap-3 flex-1 min-h-0">
-        {/* Switch group */}
-        <div className="flex items-center p-0.5 rounded-xl bg-[#F3F3EE] w-fit">
+        {/* Switch group - exact Figma: w-[167px] h-10 p-[2px] rounded-xl */}
+        <div className="flex items-center justify-center p-[2px] rounded-xl bg-[#F3F3EE] w-[167px] h-10">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "flex items-center justify-center px-2.5 py-2 rounded-[10px] text-sm font-medium leading-5 tracking-[-0.006em] transition-all",
+                "flex items-center justify-center px-2.5 py-2 h-9 rounded-[10px] text-sm font-medium leading-5 tracking-[-0.006em] transition-all",
                 activeTab === tab
                   ? "bg-card shadow-[0px_0px_16px_rgba(0,0,0,0.06)]"
                   : ""
@@ -122,20 +130,24 @@ const ContactInfoPanel = ({ name, avatar, email, onClose }: ContactInfoPanelProp
           <div className="flex flex-col gap-2">
             {mediaByMonth.map((group) => (
               <div key={group.month} className="flex flex-col gap-1">
-                {/* Month header */}
-                <div className="flex items-center px-3 py-2 rounded-lg bg-[#F8F8F5]">
+                {/* Month header - Figma: px-3 py-2 h-8 rounded-lg bg-[#F8F8F5] */}
+                <div className="flex items-center px-3 py-2 h-8 rounded-lg bg-[#F8F8F5]">
                   <span className="text-xs font-medium leading-4" style={{ color: "#8B8B8B" }}>
                     {group.month}
                   </span>
                 </div>
-                {/* Media grid - 4 columns */}
-                <div className="grid grid-cols-4 gap-1">
-                  {group.items.map((bg, i) => (
-                    <div
-                      key={i}
-                      className="aspect-square rounded-lg"
-                      style={{ background: bg }}
-                    />
+                {/* Media grid - 4 cols, gap-1, square items with rounded-lg */}
+                <div className="flex flex-col gap-1">
+                  {chunkArray(group.items, 4).map((row, ri) => (
+                    <div key={ri} className="flex gap-1">
+                      {row.map((bg, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 aspect-square rounded-lg"
+                          style={{ background: bg }}
+                        />
+                      ))}
+                    </div>
                   ))}
                 </div>
               </div>
